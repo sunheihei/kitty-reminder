@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kitty Reminder - 小猫提醒</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#f5933d",
+              "background-light": "#f8f7f5",
+              "background-dark": "#221810",
+            },
+            fontFamily: {
+              display: ["Epilogue", "Microsoft YaHei", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              lg: "1rem",
+              xl: "1.5rem",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background-light dark:bg-background-dark font-display text-[#1c140d] dark:text-background-light"
+  >
+    <div class="flex h-screen overflow-hidden">
+      <!-- 侧边栏 -->
+      <aside
+        class="w-64 flex-shrink-0 bg-background-light dark:bg-background-dark border-r border-[#f4ede7] dark:border-white/10 p-4"
+      >
+        <div class="flex flex-col gap-4">
+          <!-- Logo -->
+          <div class="flex gap-3 items-center px-3 py-2">
+            <div
+              class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+              style="background-image: url('assets/cat.png')"
+            ></div>
+            <div class="flex flex-col">
+              <h1 class="text-[#1c140d] dark:text-white text-base font-medium">
+                Kitty Reminder
+              </h1>
+              <p class="text-[#9c7049] dark:text-gray-400 text-sm">
+                健康生活 · 高效专注
+              </p>
+            </div>
+          </div>
+
+          <!-- 导航菜单 -->
+          <div class="flex flex-col gap-2 mt-4">
+            <a
+              class="nav-link active flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer"
+              data-page="home"
+            >
+              <span class="material-symbols-outlined">notifications</span>
+              <p class="text-sm font-medium">提醒事项</p>
+            </a>
+            <a
+              class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer"
+              data-page="focus"
+            >
+              <span class="material-symbols-outlined">psychology</span>
+              <p class="text-sm font-medium">专注时间</p>
+            </a>
+            <a
+              class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer"
+              data-page="countdown"
+            >
+              <span class="material-symbols-outlined">timer</span>
+              <p class="text-sm font-medium">倒计时</p>
+            </a>
+            <a
+              class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer"
+              data-page="history"
+            >
+              <span class="material-symbols-outlined">history</span>
+              <p class="text-sm font-medium">历史记录</p>
+            </a>
+            <a
+              class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer"
+              data-page="settings"
+            >
+              <span class="material-symbols-outlined">settings</span>
+              <p class="text-sm font-medium">设置</p>
+            </a>
+            <a
+              class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer"
+              data-page="about"
+            >
+              <span class="material-symbols-outlined">info</span>
+              <p class="text-sm font-medium">关于</p>
+            </a>
+          </div>
+        </div>
+      </aside>
+      <!-- 主内容区 -->
+      <main class="flex-1 overflow-y-auto">
+        <!-- 首页 -->
+        <div id="homePage" class="page active p-10">
+          <div class="max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-8">
+              <div>
+                <h2
+                  class="text-[#1c140d] dark:text-white text-4xl font-black tracking-tight"
+                >
+                  今日提醒
+                </h2>
+                <p class="text-[#9c7049] dark:text-gray-400 text-base mt-2">
+                  管理你的健康提醒
+                </p>
+              </div>
+              <button
+                id="addReminderBtn"
+                class="px-6 py-3 font-medium text-white bg-primary rounded-lg hover:bg-primary/90 flex items-center gap-2"
+              >
+                <span class="material-symbols-outlined">add</span>
+                新建提醒
+              </button>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="grid grid-cols-2 gap-6 mb-8">
+              <div
+                class="bg-white dark:bg-white/5 rounded-xl p-6 border border-[#f4ede7] dark:border-white/10"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="text-primary flex items-center justify-center rounded-lg bg-primary/20 size-12"
+                  >
+                    <span class="material-symbols-outlined">check_circle</span>
+                  </div>
+                  <div>
+                    <p class="text-[#9c7049] dark:text-gray-400 text-sm">
+                      今日完成
+                    </p>
+                    <p
+                      id="completedCount"
+                      class="text-[#1c140d] dark:text-white text-3xl font-bold"
+                    >
+                      0
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="bg-white dark:bg-white/5 rounded-xl p-6 border border-[#f4ede7] dark:border-white/10"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="text-primary flex items-center justify-center rounded-lg bg-primary/20 size-12"
+                  >
+                    <span class="material-symbols-outlined">pending</span>
+                  </div>
+                  <div>
+                    <p class="text-[#9c7049] dark:text-gray-400 text-sm">
+                      待完成
+                    </p>
+                    <p
+                      id="pendingCount"
+                      class="text-[#1c140d] dark:text-white text-3xl font-bold"
+                    >
+                      0
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 提醒列表 -->
+            <div id="reminderList" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <!-- 倒计时页 -->
+        <div id="countdownPage" class="page hidden p-10">
+          <div class="max-w-4xl mx-auto">
+            <h2 class="text-[#1c140d] dark:text-white text-4xl font-black tracking-tight mb-2">倒计时</h2>
+            <p class="text-[#9c7049] dark:text-gray-400 text-base mb-8">设置倒计时提醒</p>
+
+            <div class="bg-white dark:bg-white/5 rounded-xl border border-[#f4ede7] dark:border-white/10 p-8 text-center">
+              <div class="text-[#1c140d] dark:text-white text-6xl font-bold mb-8" id="countdownDisplay">00:00:00</div>
+              
+              <div class="flex gap-4 justify-center mb-6">
+                <div>
+                  <label class="block text-[#9c7049] dark:text-gray-400 text-sm mb-2">小时</label>
+                  <input type="number" id="countdownHours" min="0" max="23" value="0" class="w-20 rounded-lg border-[#f4ede7] dark:border-white/20 bg-white dark:bg-background-dark dark:text-white px-4 py-2 text-center">
+                </div>
+                <div>
+                  <label class="block text-[#9c7049] dark:text-gray-400 text-sm mb-2">分钟</label>
+                  <input type="number" id="countdownMinutes" min="0" max="59" value="25" class="w-20 rounded-lg border-[#f4ede7] dark:border-white/20 bg-white dark:bg-background-dark dark:text-white px-4 py-2 text-center">
+                </div>
+                <div>
+                  <label class="block text-[#9c7049] dark:text-gray-400 text-sm mb-2">秒</label>
+                  <input type="number" id="countdownSeconds" min="0" max="59" value="0" class="w-20 rounded-lg border-[#f4ede7] dark:border-white/20 bg-white dark:bg-background-dark dark:text-white px-4 py-2 text-center">
+                </div>
+              </div>
+
+              <div class="flex gap-4 justify-center">
+                <button id="countdownStartBtn" class="px-8 py-3 font-medium text-white bg-primary rounded-lg hover:bg-primary/90 flex items-center gap-2">
+                  <span class="material-symbols-outlined">play_arrow</span>
+                  开始
+                </button>
+                <button id="countdownPauseBtn" class="hidden px-8 py-3 font-medium text-white bg-[#9c7049] rounded-lg hover:bg-[#8a6341] flex items-center gap-2">
+                  <span class="material-symbols-outlined">pause</span>
+                  暂停
+                </button>
+                <button id="countdownResetBtn" class="px-8 py-3 font-medium text-[#1c140d] dark:text-white bg-[#f4ede7] dark:bg-white/10 rounded-lg hover:bg-[#e8e1d9] dark:hover:bg-white/20 flex items-center gap-2">
+                  <span class="material-symbols-outlined">refresh</span>
+                  重置
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 专注时间页 -->
+        <div id="focusPage" class="page hidden p-10">
+          <!-- 设置界面 -->
+          <div id="focusSetup" class="max-w-4xl mx-auto">
+            <h2 class="text-[#1c140d] dark:text-white text-4xl font-black tracking-tight mb-2">专注时间</h2>
+            <p class="text-[#9c7049] dark:text-gray-400 text-base mb-8">番茄工作法 - 保持专注</p>
+
+            <div class="bg-white dark:bg-white/5 rounded-xl border border-[#f4ede7] dark:border-white/10 p-8 text-center">
+              <div class="text-[#1c140d] dark:text-white text-7xl font-bold mb-4" id="focusDisplay">25:00</div>
+              <p class="text-[#9c7049] dark:text-gray-400 text-lg mb-8" id="focusStatus">准备开始专注</p>
+
+              <div class="grid grid-cols-4 gap-4 mb-8">
+                <button class="focus-preset px-6 py-4 rounded-lg border-2 border-[#f4ede7] dark:border-white/10 hover:border-primary hover:bg-primary/10 transition-all" data-minutes="25">
+                  <div class="text-[#1c140d] dark:text-white text-2xl font-bold">25</div>
+                  <div class="text-[#9c7049] dark:text-gray-400 text-sm">分钟</div>
+                </button>
+                <button class="focus-preset px-6 py-4 rounded-lg border-2 border-[#f4ede7] dark:border-white/10 hover:border-primary hover:bg-primary/10 transition-all" data-minutes="45">
+                  <div class="text-[#1c140d] dark:text-white text-2xl font-bold">45</div>
+                  <div class="text-[#9c7049] dark:text-gray-400 text-sm">分钟</div>
+                </button>
+                <button class="focus-preset px-6 py-4 rounded-lg border-2 border-[#f4ede7] dark:border-white/10 hover:border-primary hover:bg-primary/10 transition-all" data-minutes="60">
+                  <div class="text-[#1c140d] dark:text-white text-2xl font-bold">60</div>
+                  <div class="text-[#9c7049] dark:text-gray-400 text-sm">分钟</div>
+                </button>
+                <button id="focusCustomBtn" class="px-6 py-4 rounded-lg border-2 border-[#f4ede7] dark:border-white/10 hover:border-primary hover:bg-primary/10 transition-all">
+                  <div class="text-[#1c140d] dark:text-white text-2xl font-bold">
+                    <span class="material-symbols-outlined">edit</span>
+                  </div>
+                  <div class="text-[#9c7049] dark:text-gray-400 text-sm">自定义</div>
+                </button>
+              </div>
+
+              <div class="flex gap-4 justify-center">
+                <button id="focusStartBtn" class="px-8 py-3 font-medium text-white bg-primary rounded-lg hover:bg-primary/90 flex items-center gap-2">
+                  <span class="material-symbols-outlined">play_arrow</span>
+                  开始专注
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 专注中界面 -->
+          <div id="focusActive" class="hidden h-full flex items-center justify-center">
+            <div class="text-center">
+              <!-- 圆形进度动画 -->
+              <div class="relative inline-block mb-8">
+                <svg class="transform -rotate-90" width="300" height="300">
+                  <circle cx="150" cy="150" r="140" stroke="rgba(245, 147, 61, 0.2)" stroke-width="8" fill="none"/>
+                  <circle id="focusProgressCircle" cx="150" cy="150" r="140" stroke="#f5933d" stroke-width="8" fill="none" 
+                    stroke-dasharray="879.6" stroke-dashoffset="879.6" stroke-linecap="round"
+                    style="transition: stroke-dashoffset 1s linear"/>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div>
+                    <div class="text-[#1c140d] dark:text-white text-6xl font-bold mb-2" id="focusActiveDisplay">25:00</div>
+                    <p class="text-[#9c7049] dark:text-gray-400 text-lg" id="focusActiveStatus">专注中...</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex gap-4 justify-center">
+                <button id="focusActivePauseBtn" class="px-8 py-3 font-medium text-white bg-[#9c7049] rounded-lg hover:bg-[#8a6341] flex items-center gap-2">
+                  <span class="material-symbols-outlined">pause</span>
+                  暂停
+                </button>
+                <button id="focusActiveStopBtn" class="px-8 py-3 font-medium text-[#1c140d] dark:text-white bg-[#f4ede7] dark:bg-white/10 rounded-lg hover:bg-[#e8e1d9] dark:hover:bg-white/20 flex items-center gap-2">
+                  <span class="material-symbols-outlined">close</span>
+                  结束
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 历史记录页 -->
+        <div id="historyPage" class="page hidden p-10">
+          <div class="max-w-4xl mx-auto">
+            <h2
+              class="text-[#1c140d] dark:text-white text-4xl font-black tracking-tight mb-2"
+            >
+              历史记录
+            </h2>
+            <p class="text-[#9c7049] dark:text-gray-400 text-base mb-8">
+              查看过往提醒记录
+            </p>
+
+            <!-- 筛选栏 -->
+            <div class="flex gap-4 mb-6">
+              <select
+                id="historyFilter"
+                class="rounded-lg border-[#f4ede7] dark:border-white/20 bg-white dark:bg-background-dark dark:text-white px-4 py-2"
+              >
+                <option value="all">全部类型</option>
+                <option value="water">喝水</option>
+                <option value="standup">起身</option>
+                <option value="exercise">运动</option>
+                <option value="eye">远眺放松</option>
+                <option value="custom">自定义</option>
+              </select>
+              <input
+                type="date"
+                id="historyDate"
+                class="rounded-lg border-[#f4ede7] dark:border-white/20 bg-white dark:bg-background-dark dark:text-white px-4 py-2"
+              />
+            </div>
+
+            <!-- 历史列表 -->
+            <div id="historyList" class="space-y-3"></div>
+          </div>
+        </div>
+        <!-- 设置页 -->
+        <div id="settingsPage" class="page hidden p-10">
+          <div class="max-w-3xl mx-auto">
+            <h2
+              class="text-[#1c140d] dark:text-white text-4xl font-black tracking-tight mb-2"
+            >
+              设置
+            </h2>
+            <p class="text-[#9c7049] dark:text-gray-400 text-base mb-8">
+              管理你的提醒偏好
+            </p>
+
+            <!-- 通用设置 -->
+            <h3
+              class="text-[#1c140d] dark:text-white text-[22px] font-bold px-4 pb-3 pt-5"
+            >
+              通用
+            </h3>
+            <div
+              class="bg-white dark:bg-white/5 rounded-xl border border-[#f4ede7] dark:border-white/10 divide-y divide-[#f4ede7] dark:divide-white/10"
+            >
+              <div
+                class="flex items-center gap-4 px-4 min-h-[72px] py-2 justify-between"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="text-[#1c140d] dark:text-white flex items-center justify-center rounded-lg bg-[#f4ede7] dark:bg-white/10 size-12"
+                  >
+                    <span class="material-symbols-outlined">schedule</span>
+                  </div>
+                  <div>
+                    <p
+                      class="text-[#1c140d] dark:text-white text-base font-medium"
+                    >
+                      默认提醒间隔
+                    </p>
+                    <p class="text-[#9c7049] dark:text-gray-400 text-sm">
+                      设置默认的提醒时间间隔
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <input
+                    id="defaultInterval"
+                    type="number"
+                    value="60"
+                    min="5"
+                    max="240"
+                    class="w-20 rounded-md border-[#f4ede7] dark:border-white/20 bg-background-light dark:bg-background-dark dark:text-white text-right"
+                  />
+                  <span class="text-[#9c7049] dark:text-gray-400 text-sm"
+                    >分钟</span
+                  >
+                </div>
+              </div>
+
+              <div
+                class="flex items-center gap-4 px-4 min-h-[72px] py-2 justify-between"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="text-[#1c140d] dark:text-white flex items-center justify-center rounded-lg bg-[#f4ede7] dark:bg-white/10 size-12"
+                  >
+                    <span class="material-symbols-outlined"
+                      >power_settings_new</span
+                    >
+                  </div>
+                  <div>
+                    <p
+                      class="text-[#1c140d] dark:text-white text-base font-medium"
+                    >
+                      开机自启动
+                    </p>
+                    <p class="text-[#9c7049] dark:text-gray-400 text-sm">
+                      系统启动时自动运行
+                    </p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input id="autoStart" type="checkbox" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            <!-- 通知设置 -->
+            <h3
+              class="text-[#1c140d] dark:text-white text-[22px] font-bold px-4 pb-3 pt-10"
+            >
+              通知
+            </h3>
+            <div
+              class="bg-white dark:bg-white/5 rounded-xl border border-[#f4ede7] dark:border-white/10 divide-y divide-[#f4ede7] dark:divide-white/10"
+            >
+              <div
+                class="flex items-center gap-4 px-4 min-h-[72px] py-2 justify-between"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="text-[#1c140d] dark:text-white flex items-center justify-center rounded-lg bg-[#f4ede7] dark:bg-white/10 size-12"
+                  >
+                    <span class="material-symbols-outlined"
+                      >notifications_active</span
+                    >
+                  </div>
+                  <div>
+                    <p
+                      class="text-[#1c140d] dark:text-white text-base font-medium"
+                    >
+                      桌面通知
+                    </p>
+                    <p class="text-[#9c7049] dark:text-gray-400 text-sm">
+                      显示系统原生通知（跨平台兼容）
+                    </p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input id="notificationEnabled" type="checkbox" checked />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div
+                class="flex items-center gap-4 px-4 min-h-[72px] py-2 justify-between"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="text-[#1c140d] dark:text-white flex items-center justify-center rounded-lg bg-[#f4ede7] dark:bg-white/10 size-12"
+                  >
+                    <span class="material-symbols-outlined">volume_up</span>
+                  </div>
+                  <div>
+                    <p
+                      class="text-[#1c140d] dark:text-white text-base font-medium"
+                    >
+                      提醒音效
+                    </p>
+                    <p class="text-[#9c7049] dark:text-gray-400 text-sm">
+                      播放提醒声音
+                    </p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input id="soundEnabled" type="checkbox" checked />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div
+                id="soundSelectRow"
+                class="flex items-center gap-4 px-4 min-h-[72px] py-2 justify-between"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="text-[#1c140d] dark:text-white flex items-center justify-center rounded-lg bg-[#f4ede7] dark:bg-white/10 size-12"
+                  >
+                    <span class="material-symbols-outlined">music_note</span>
+                  </div>
+                  <div>
+                    <p
+                      class="text-[#1c140d] dark:text-white text-base font-medium"
+                    >
+                      音效选择
+                    </p>
+                    <p class="text-[#9c7049] dark:text-gray-400 text-sm">
+                      选择时自动试听
+                    </p>
+                  </div>
+                </div>
+                <div class="shrink-0">
+                  <select
+                    id="soundSelect"
+                    class="rounded-md border-[#f4ede7] dark:border-white/20 bg-background-light dark:bg-background-dark dark:text-white px-4 py-2 pr-10 min-w-[120px]"
+                  >
+                    <option value="noti1">音效 1</option>
+                    <option value="noti2">音效 2</option>
+                    <option value="noti3">音效 3</option>
+                    <option value="noti4">音效 4</option>
+                    <option value="noti5">音效 5</option>
+                    <option value="noti6">音效 6</option>
+                    <option value="noti7">音效 7</option>
+                    <option value="noti8">音效 8</option>
+                  </select>
+                </div>
+              </div>
+
+              <div
+                class="flex items-center gap-4 px-4 min-h-[72px] py-2 justify-between"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="text-[#1c140d] dark:text-white flex items-center justify-center rounded-lg bg-[#f4ede7] dark:bg-white/10 size-12"
+                  >
+                    <span class="material-symbols-outlined">open_in_new</span>
+                  </div>
+                  <div>
+                    <p
+                      class="text-[#1c140d] dark:text-white text-base font-medium"
+                    >
+                      点击通知时显示窗口
+                    </p>
+                    <p class="text-[#9c7049] dark:text-gray-400 text-sm">
+                      点击通知后自动打开主窗口
+                    </p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input id="showWindowOnClick" type="checkbox" checked />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 外观设置 -->
+            <h3
+              class="text-[#1c140d] dark:text-white text-[22px] font-bold px-4 pb-3 pt-10"
+            >
+              外观
+            </h3>
+            <div
+              class="bg-white dark:bg-white/5 rounded-xl border border-[#f4ede7] dark:border-white/10 divide-y divide-[#f4ede7] dark:divide-white/10"
+            >
+              <div
+                class="flex items-center gap-4 px-4 min-h-[72px] py-2 justify-between"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="text-[#1c140d] dark:text-white flex items-center justify-center rounded-lg bg-[#f4ede7] dark:bg-white/10 size-12"
+                  >
+                    <span class="material-symbols-outlined">dark_mode</span>
+                  </div>
+                  <div>
+                    <p
+                      class="text-[#1c140d] dark:text-white text-base font-medium"
+                    >
+                      深色模式
+                    </p>
+                    <p class="text-[#9c7049] dark:text-gray-400 text-sm">
+                      切换浅色和深色主题
+                    </p>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input id="darkModeToggle" type="checkbox" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            <!-- 数据设置 -->
+            <h3
+              class="text-[#1c140d] dark:text-white text-[22px] font-bold px-4 pb-3 pt-10"
+            >
+              数据
+            </h3>
+            <div
+              class="bg-white dark:bg-white/5 rounded-xl border border-[#f4ede7] dark:border-white/10"
+            >
+              <div
+                class="flex items-center gap-4 px-4 min-h-[72px] py-2 justify-between"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="text-[#1c140d] dark:text-white flex items-center justify-center rounded-lg bg-[#f4ede7] dark:bg-white/10 size-12"
+                  >
+                    <span class="material-symbols-outlined">delete_sweep</span>
+                  </div>
+                  <div>
+                    <p
+                      class="text-[#1c140d] dark:text-white text-base font-medium"
+                    >
+                      清空历史记录
+                    </p>
+                    <p class="text-[#9c7049] dark:text-gray-400 text-sm">
+                      永久删除所有提醒历史
+                    </p>
+                  </div>
+                </div>
+                <button
+                  id="clearHistoryBtn"
+                  class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                >
+                  清空数据
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 关于页 -->
+        <div id="aboutPage" class="page hidden p-10">
+          <div class="max-w-3xl mx-auto">
+            <div class="text-center py-12">
+              <img
+                src="assets/cat.png"
+                alt="Kitty"
+                class="w-32 h-32 rounded-full mx-auto mb-6 object-cover"
+              />
+              <h2
+                class="text-[#1c140d] dark:text-white text-4xl font-black mb-2"
+              >
+                Kitty Reminder
+              </h2>
+              <p class="text-[#9c7049] dark:text-gray-400 text-base mb-8">
+                版本 1.0.0
+              </p>
+              <p class="text-[#1c140d] dark:text-white text-lg mb-12">
+                健康生活助手 · 专注时间管理<br />让每一刻都充满价值
+              </p>
+
+              <div
+                class="bg-white dark:bg-white/5 rounded-xl border border-[#f4ede7] dark:border-white/10 p-8 text-left"
+              >
+                <h3
+                  class="text-[#1c140d] dark:text-white text-xl font-bold mb-4"
+                >
+                  功能特性
+                </h3>
+                <ul class="space-y-3 text-[#1c140d] dark:text-white">
+                  <li class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary"
+                      >check_circle</span
+                    >
+                    智能提醒 - 定时提醒喝水、起身、运动
+                  </li>
+                  <li class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary"
+                      >check_circle</span
+                    >
+                    专注时间 - 番茄工作法，保持高效专注
+                  </li>
+                  <li class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary"
+                      >check_circle</span
+                    >
+                    倒计时 - 灵活的时间管理工具
+                  </li>
+                  <li class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary"
+                      >check_circle</span
+                    >
+                    历史记录 - 追踪你的健康习惯
+                  </li>
+                  <li class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary"
+                      >check_circle</span
+                    >
+                    系统托盘 - 后台运行不打扰
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <!-- 新建提醒弹窗 -->
+    <div
+      id="addReminderModal"
+      class="modal hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+    >
+      <div
+        class="bg-background-light dark:bg-background-dark rounded-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto"
+      >
+        <div class="p-6 border-b border-[#f4ede7] dark:border-white/10">
+          <div class="flex justify-between items-center">
+            <h3 class="text-[#1c140d] dark:text-white text-2xl font-bold">
+              新建提醒
+            </h3>
+            <button
+              id="closeModalBtn"
+              class="text-[#9c7049] hover:text-[#1c140d] dark:hover:text-white"
+            >
+              <span class="material-symbols-outlined text-3xl">close</span>
+            </button>
+          </div>
+        </div>
+        <div class="p-6 space-y-4">
+          <div>
+            <label
+              class="block text-[#1c140d] dark:text-white text-sm font-medium mb-2"
+              >提醒类型</label
+            >
+            <select
+              id="reminderType"
+              class="w-full rounded-lg border-[#f4ede7] dark:border-white/20 bg-white dark:bg-background-dark dark:text-white px-4 py-2"
+            >
+              <option value="water">喝水</option>
+              <option value="standup">起身活动</option>
+              <option value="exercise">运动</option>
+              <option value="eye">远眺放松</option>
+              <option value="custom">自定义</option>
+            </select>
+          </div>
+          <div id="customTextGroup" class="hidden">
+            <label
+              class="block text-[#1c140d] dark:text-white text-sm font-medium mb-2"
+              >自定义内容</label
+            >
+            <input
+              id="customText"
+              type="text"
+              placeholder="输入提醒内容"
+              class="w-full rounded-lg border-[#f4ede7] dark:border-white/20 bg-white dark:bg-background-dark dark:text-white px-4 py-2"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-[#1c140d] dark:text-white text-sm font-medium mb-2"
+              >提醒时间</label
+            >
+            <input
+              id="reminderTime"
+              type="time"
+              class="w-full rounded-lg border-[#f4ede7] dark:border-white/20 bg-white dark:bg-background-dark dark:text-white px-4 py-2"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-[#1c140d] dark:text-white text-sm font-medium mb-2"
+              >重复设置</label
+            >
+            <select
+              id="repeatType"
+              class="w-full rounded-lg border-[#f4ede7] dark:border-white/20 bg-white dark:bg-background-dark dark:text-white px-4 py-2"
+            >
+              <option value="once">仅一次</option>
+              <option value="daily">每天</option>
+              <option value="weekday">工作日</option>
+              <option value="weekend">周末</option>
+              <option value="interval">间隔重复</option>
+            </select>
+          </div>
+          <div id="intervalGroup" class="hidden">
+            <label
+              class="block text-[#1c140d] dark:text-white text-sm font-medium mb-2"
+              >间隔时间（分钟）</label
+            >
+            <input
+              id="intervalMinutes"
+              type="number"
+              value="60"
+              min="5"
+              max="240"
+              class="w-full rounded-lg border-[#f4ede7] dark:border-white/20 bg-white dark:bg-background-dark dark:text-white px-4 py-2"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-[#1c140d] dark:text-white text-sm font-medium mb-2"
+              >备注（可选）</label
+            >
+            <textarea
+              id="reminderNote"
+              rows="3"
+              placeholder="添加备注"
+              class="w-full rounded-lg border-[#f4ede7] dark:border-white/20 bg-white dark:bg-background-dark dark:text-white px-4 py-2"
+            ></textarea>
+          </div>
+        </div>
+        <div
+          class="p-6 border-t border-[#f4ede7] dark:border-white/10 flex justify-end gap-3"
+        >
+          <button
+            id="cancelModalBtn"
+            class="px-6 py-2 font-medium text-[#1c140d] dark:text-white bg-[#f4ede7] dark:bg-white/10 rounded-lg hover:bg-[#e8e1d9] dark:hover:bg-white/20"
+          >
+            取消
+          </button>
+          <button
+            id="saveReminderBtn"
+            class="px-6 py-2 font-medium text-white bg-primary rounded-lg hover:bg-primary/90"
+          >
+            保存
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- 提醒弹窗（保留但不使用，改用系统通知） -->
+    <div
+      id="reminderPopup"
+      class="modal hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      style="display: none !important"
+    >
+      <div
+        class="bg-background-light dark:bg-background-dark rounded-xl max-w-md w-full mx-4 p-8 text-center"
+      >
+        <img
+          src="assets/cat.png"
+          alt="Kitty"
+          class="w-24 h-24 rounded-full mx-auto mb-6 object-cover"
+        />
+        <h3
+          id="popupTitle"
+          class="text-[#1c140d] dark:text-white text-3xl font-bold mb-3"
+        >
+          该喝水啦！
+        </h3>
+        <p
+          id="popupMessage"
+          class="text-[#9c7049] dark:text-gray-400 text-lg mb-8"
+        >
+          小猫提醒你要多喝水哦~
+        </p>
+        <div class="flex gap-3 justify-center mb-4">
+          <button
+            id="completeBtn"
+            class="px-8 py-3 font-medium text-white bg-primary rounded-lg hover:bg-primary/90 flex items-center gap-2"
+          >
+            <span class="material-symbols-outlined">check</span>
+            完成
+          </button>
+          <button
+            id="snoozeBtn"
+            class="px-8 py-3 font-medium text-[#1c140d] dark:text-white bg-[#f4ede7] dark:bg-white/10 rounded-lg hover:bg-[#e8e1d9] dark:hover:bg-white/20 flex items-center gap-2"
+          >
+            <span class="material-symbols-outlined">schedule</span>
+            延迟
+          </button>
+        </div>
+        <div id="snoozeOptions" class="hidden flex gap-2 justify-center">
+          <button
+            class="snooze-time px-4 py-2 text-sm font-medium text-[#1c140d] dark:text-white bg-[#f4ede7] dark:bg-white/10 rounded-lg hover:bg-primary hover:text-white"
+            data-minutes="5"
+          >
+            5分钟
+          </button>
+          <button
+            class="snooze-time px-4 py-2 text-sm font-medium text-[#1c140d] dark:text-white bg-[#f4ede7] dark:bg-white/10 rounded-lg hover:bg-primary hover:text-white"
+            data-minutes="10"
+          >
+            10分钟
+          </button>
+          <button
+            class="snooze-time px-4 py-2 text-sm font-medium text-[#1c140d] dark:text-white bg-[#f4ede7] dark:bg-white/10 rounded-lg hover:bg-primary hover:text-white"
+            data-minutes="15"
+          >
+            15分钟
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .page {
+        display: none;
+      }
+      .page.active {
+        display: block;
+      }
+
+      .nav-link {
+        transition: all 0.2s;
+      }
+      .nav-link:hover {
+        background: rgba(245, 147, 61, 0.1);
+      }
+      .nav-link.active {
+        background: rgba(245, 147, 61, 0.2);
+        color: #f5933d;
+      }
+
+      .toggle-switch {
+        position: relative;
+        display: flex;
+        height: 31px;
+        width: 51px;
+        cursor: pointer;
+        align-items: center;
+        border-radius: 9999px;
+        border: none;
+        background: #f4ede7;
+        padding: 2px;
+      }
+      .dark .toggle-switch {
+        background: rgba(255, 255, 255, 0.2);
+      }
+      .toggle-switch input {
+        position: absolute;
+        visibility: hidden;
+      }
+      .toggle-slider {
+        height: 27px;
+        width: 27px;
+        border-radius: 9999px;
+        background: white;
+        box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 8px,
+          rgba(0, 0, 0, 0.06) 0px 3px 1px;
+        transition: transform 0.2s;
+      }
+      .dark .toggle-slider {
+        background: #221810;
+      }
+      .toggle-switch input:checked ~ .toggle-slider {
+        transform: translateX(20px);
+      }
+      .toggle-switch:has(input:checked) {
+        background: #f5933d;
+      }
+
+      /* 小号开关（用于列表项） */
+      .toggle-switch-small {
+        position: relative;
+        display: flex;
+        height: 24px;
+        width: 44px;
+        cursor: pointer;
+        align-items: center;
+        border-radius: 9999px;
+        border: none;
+        background: #e0e0e0;
+        padding: 2px;
+        transition: background 0.2s;
+      }
+      .dark .toggle-switch-small {
+        background: rgba(255, 255, 255, 0.15);
+      }
+      .toggle-switch-small input {
+        position: absolute;
+        visibility: hidden;
+      }
+      .toggle-slider-small {
+        height: 20px;
+        width: 20px;
+        border-radius: 9999px;
+        background: white;
+        box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 4px;
+        transition: transform 0.2s;
+      }
+      .dark .toggle-slider-small {
+        background: #221810;
+      }
+      .toggle-switch-small input:checked ~ .toggle-slider-small {
+        transform: translateX(20px);
+      }
+      .toggle-switch-small:has(input:checked) {
+        background: #f5933d;
+      }
+
+      /* 自定义滚动条样式 */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.3);
+      }
+      .dark ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      /* 火狐浏览器滚动条 */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+      }
+      .dark * {
+        scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+      }
+
+      /* 下拉选择框统一样式 - 防止文字和箭头重叠 */
+      select {
+        padding-right: 2.5rem !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%239c7049' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+        background-size: 1.5em 1.5em;
+        appearance: none;
+      }
+      
+      .dark select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23d1d5db' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      }
+    </style>
+
+    <!-- 自定义对话框 -->
+    <div
+      id="customDialog"
+      class="modal hidden fixed inset-0 bg-black/50 flex items-center justify-center z-[2000]"
+    >
+      <div
+        class="bg-background-light dark:bg-background-dark rounded-xl max-w-md w-full mx-4 shadow-2xl"
+      >
+        <div class="p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div
+              class="text-primary flex items-center justify-center rounded-lg bg-primary/20 size-12"
+            >
+              <span id="dialogIcon" class="material-symbols-outlined"
+                >info</span
+              >
+            </div>
+            <h3
+              id="dialogTitle"
+              class="text-[#1c140d] dark:text-white text-xl font-bold"
+            >
+              提示
+            </h3>
+          </div>
+          <p
+            id="dialogMessage"
+            class="text-[#1c140d] dark:text-white text-base leading-relaxed mb-6"
+          ></p>
+          <div class="flex justify-end gap-3">
+          <button
+            id="dialogCancelBtn"
+            class="px-6 py-2 font-medium text-[#1c140d] dark:text-white bg-[#f4ede7] dark:bg-white/10 rounded-lg hover:bg-[#e8e1d9] dark:hover:bg-white/20"
+          >
+            取消
+          </button>
+          <button
+            id="dialogConfirmBtn"
+            class="px-6 py-2 font-medium text-white bg-primary rounded-lg hover:bg-primary/90"
+          >
+            确定
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>

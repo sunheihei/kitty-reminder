@@ -1,0 +1,17 @@
+{
+  "name": "kitty-reminder",
+  "productName": "Kitty Reminder",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["reminder", "electron", "productivity"],
+  "author": "",
+  "license": "ISC",
+  "description": "可爱的小猫提醒应用 - 定时提醒喝水和起身活动",
+  "devDependencies": {
+    "electron": "^39.0.0"
+  }
+}
