@@ -5,13 +5,59 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "build": "electron-builder --mac",
+    "build:dmg": "electron-builder --mac dmg",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["reminder", "electron", "productivity"],
+  "keywords": [
+    "reminder",
+    "electron",
+    "productivity"
+  ],
   "author": "",
   "license": "ISC",
   "description": "可爱的小猫提醒应用 - 定时提醒喝水和起身活动",
+  "build": {
+    "appId": "com.kitty.reminder",
+    "productName": "Kitty Reminder",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "assets/cat.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ]
+    },
+    "dmg": {
+      "title": "Kitty Reminder",
+      "icon": "assets/cat.icns",
+      "window": {
+        "width": 540,
+        "height": 380
+      },
+      "contents": [
+        {
+          "x": 144,
+          "y": 180
+        },
+        {
+          "x": 396,
+          "y": 180,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "files": [
+      "**/*",
+      "!node_modules/**/*",
+      "node_modules/electron/**/*"
+    ]
+  },
   "devDependencies": {
-    "electron": "^39.0.0"
+    "electron": "^39.0.0",
+    "electron-builder": "^26.0.12"
   }
 }

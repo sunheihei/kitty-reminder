@@ -16,6 +16,11 @@ let mainWindow;
 let tray;
 
 function createWindow() {
+  // 根据平台选择合适的图标格式
+  const iconPath = process.platform === 'darwin' 
+    ? path.join(__dirname, "assets/cat.icns")
+    : path.join(__dirname, "assets/cat.png");
+
   mainWindow = new BrowserWindow({
     width: 1000,
     height: 750,
@@ -25,7 +30,7 @@ function createWindow() {
       nodeIntegration: true,
       contextIsolation: false,
     },
-    icon: path.join(__dirname, "assets/cat.png"),
+    icon: iconPath,
     show: true,
     frame: true,
     resizable: true,
@@ -97,7 +102,19 @@ function createTray() {
   });
 }
 
+// 在应用准备好之前设置图标
+if (process.platform === 'darwin') {
+  app.whenReady().then(() => {
+    const iconPath = path.join(__dirname, "assets/cat.png");
+    const icon = nativeImage.createFromPath(iconPath);
+    // 调整图标大小以确保正确显示
+    const resizedIcon = icon.resize({ width: 512, height: 512 });
+    app.dock.setIcon(resizedIcon);
+  });
+}
+
 app.whenReady().then(() => {
+  
   // 设置 Windows 通知的 AppUserModelID
   // 使用应用名称而不是包名
   if (process.platform === "win32") {
@@ -118,12 +135,15 @@ app.whenReady().then(() => {
   // 监听显示通知的请求
   ipcMain.on("show-notification", (event, data) => {
     // 使用传递的图标路径，如果没有则使用默认图标
-    const iconPath = data.icon ? path.join(__dirname, data.icon) : path.join(__dirname, "assets/cat.png");
+    const iconPath = data.icon 
+      ? path.join(__dirname, data.icon) 
+      : path.join(__dirname, "assets/cat-notification.png");
+    const icon = nativeImage.createFromPath(iconPath);
     
     const notification = new Notification({
       title: data.title,
       body: data.body + "\n\n💡 点击完成",
-      icon: iconPath,
+      icon: icon,
       silent: true, // 总是静音，我们手动播放音效
       timeoutType: "default",
     });
