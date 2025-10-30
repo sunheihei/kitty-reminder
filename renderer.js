@@ -351,7 +351,7 @@ function renderReminders() {
     return;
   }
 
-  list.innerHTML = today
+  list.innerHTML = reminders
     .map((r) => {
       const typeText = getReminderTypeText(r.type, r.customText);
       const timeText =
@@ -892,7 +892,8 @@ function startCountdown() {
             title: '倒计时结束',
             body: '时间到！⏰',
             reminderId: Date.now(),
-            playSound: false
+            playSound: false,
+            icon: 'assets/image/countdown.png'
           });
         }
       }
@@ -942,7 +943,8 @@ function resumeCountdown() {
             title: '倒计时结束',
             body: '时间到！⏰',
             reminderId: Date.now(),
-            playSound: false
+            playSound: false,
+            icon: 'assets/image/countdown.png'
           });
         }
       }
@@ -1234,7 +1236,8 @@ function startFocus() {
             title: '专注时间结束',
             body: '做得好！完成了一次专注 🎉',
             reminderId: Date.now(),
-            playSound: false
+            playSound: false,
+            icon: 'assets/image/focus.png'
           });
         }
       }
@@ -1288,7 +1291,8 @@ function resumeFocus() {
             title: '专注时间结束',
             body: '做得好！完成了一次专注 🎉',
             reminderId: Date.now(),
-            playSound: false
+            playSound: false,
+            icon: 'assets/image/focus.png'
           });
         }
       }
