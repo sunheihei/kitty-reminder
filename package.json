@@ -1,14 +1,14 @@
 {
   "name": "kitty-reminder",
   "productName": "Kitty Reminder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "package:win": "electron-packager . \"Kitty Reminder\" --platform=win32 --arch=x64 --out=release --overwrite --icon=assets/cat.ico --win32metadata.CompanyName=\"\" --win32metadata.FileDescription=\"可爱的小猫提醒应用\" --win32metadata.ProductName=\"Kitty Reminder\"",
-    "package:mac": "electron-packager . \"Kitty Reminder\" --platform=darwin --arch=x64,arm64 --out=release --overwrite --icon=assets/cat.png",
-    "package:linux": "electron-packager . \"Kitty Reminder\" --platform=linux --arch=x64 --out=release --overwrite",
-    "package:all": "npm run package:win && npm run package:mac && npm run package:linux"
+    "build": "electron-builder --mac",
+    "build:dmg": "electron-builder --mac dmg",
+    "build:all": "electron-builder -mwl",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "reminder",
@@ -17,10 +17,57 @@
   ],
   "author": "",
   "license": "ISC",
-  "description": "可爱的小猫提醒应用 - 定时提醒喝水和起身活动",
+  "description": "Cute kitty reminder app - Timely reminders for water and breaks",
+  "build": {
+    "appId": "com.kitty.reminder",
+    "productName": "Kitty Reminder",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "assets/cat.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ]
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/cat.ico"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "icon": "assets/cat.png",
+      "category": "Utility"
+    },
+    "dmg": {
+      "title": "Kitty Reminder",
+      "icon": "assets/cat.icns",
+      "window": {
+        "width": 540,
+        "height": 380
+      },
+      "contents": [
+        {
+          "x": 144,
+          "y": 180
+        },
+        {
+          "x": 396,
+          "y": 180,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "files": [
+      "**/*",
+      "!node_modules/**/*",
+      "node_modules/electron/**/*"
+    ]
+  },
   "devDependencies": {
     "electron": "^39.0.0",
-    "electron-packager": "^17.1.2",
-    "rcedit": "^4.0.1"
+    "electron-builder": "^26.0.12"
   }
 }

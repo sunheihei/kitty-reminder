@@ -63,21 +63,21 @@ function createTray() {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: "显示主窗口",
+      label: "Show Window",
       click: () => {
         mainWindow.show();
         mainWindow.focus();
       },
     },
     {
-      label: "关于",
+      label: "About",
       click: () => {
         mainWindow.show();
         mainWindow.webContents.send("switch-page", "about");
       },
     },
     {
-      label: "退出",
+      label: "Quit",
       click: () => {
         app.isQuitting = true;
         app.quit();
@@ -85,7 +85,7 @@ function createTray() {
     },
   ]);
 
-  tray.setToolTip("Kitty Reminder - 小猫提醒");
+  tray.setToolTip("Kitty Reminder");
   tray.setContextMenu(contextMenu);
 
   // 点击托盘图标显示/隐藏窗口
@@ -139,9 +139,9 @@ app.whenReady().then(() => {
     
     const notification = new Notification({
       title: data.title,
-      body: data.body + "\n\n💡 点击完成",
+      body: data.body + "\n\n💡 Click to complete",
       icon: icon,
-      silent: true, // 总是静音，我们手动播放音效
+      silent: true, // Always silent, we play sound manually
       timeoutType: "default",
     });
 
