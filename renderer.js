@@ -187,12 +187,17 @@ function initEventListeners() {
   // 语言切换
   document.getElementById("languageSelect").addEventListener("change", (e) => {
     const newLang = e.target.value;
+    console.log('Switching language to:', newLang);
     setLanguage(newLang);
     settings.language = newLang;
     saveData();
+    
+    // 强制更新所有界面文本
     updateUIText();
     renderReminders();
     renderHistory();
+    
+    console.log('Language switched to:', getCurrentLanguage());
   });
 
   // 历史筛选
@@ -359,7 +364,7 @@ function renderReminders() {
 
   if (reminders.length === 0) {
     list.innerHTML =
-      '<div class="text-center py-12"><p class="text-[#9c7049] dark:text-gray-400 text-lg">暂无提醒，点击上方按钮创建吧！</p></div>';
+      `<div class="text-center py-12"><p class="text-[#9c7049] dark:text-gray-400 text-lg">${t('noReminders')}</p></div>`;
     return;
   }
 
@@ -367,7 +372,9 @@ function renderReminders() {
     .map((r) => {
       const typeText = getReminderTypeText(r.type, r.customText);
       const timeText =
-        r.repeatType === "interval" ? `每 ${r.intervalMinutes} 分钟` : r.time;
+        r.repeatType === "interval" 
+          ? `${t('unitEvery')} ${r.intervalMinutes} ${t('unitMinutes')}` 
+          : r.time;
       const repeatText = getRepeatText(r.repeatType);
 
       return `
@@ -669,10 +676,10 @@ function renderHistory() {
 
   if (filtered.length === 0) {
     const displayDate = dateFilter ? new Date(dateFilter) : new Date();
-    const dateText = `${
-      displayDate.getMonth() + 1
-    }月${displayDate.getDate()}日`;
-    list.innerHTML = `<div class="text-center py-12"><p class="text-[#9c7049] dark:text-gray-400 text-lg">${dateText} 暂无记录</p></div>`;
+    const dateText = getCurrentLanguage() === 'zh-CN' 
+      ? `${displayDate.getMonth() + 1}月${displayDate.getDate()}日`
+      : displayDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+    list.innerHTML = `<div class="text-center py-12"><p class="text-[#9c7049] dark:text-gray-400 text-lg">${dateText} ${t('historyNoRecords')}</p></div>`;
     return;
   }
 
@@ -703,7 +710,7 @@ function renderHistory() {
             ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
             : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
         }">
-          ${h.status === "completed" ? "已完成" : "未完成"}
+          ${h.status === "completed" ? t('historyCompleted') : t('historyMissed')}
         </span>
       </div>
     `;
@@ -754,11 +761,11 @@ function clearHistory() {
 // 自定义对话框
 function showDialog(options) {
   const {
-    title = "提示",
+    title = t('dialogTitle'),
     message = "",
     icon = "info",
-    confirmText = "确定",
-    cancelText = "取消",
+    confirmText = t('dialogConfirm'),
+    cancelText = t('dialogCancel'),
     showCancel = true,
     onConfirm = null,
     onCancel = null,
@@ -865,7 +872,7 @@ function startCountdown() {
   updateCountdownProgress();
   
   countdownIsPaused = false;
-  document.getElementById("countdownPauseBtn").innerHTML = '<span class="material-symbols-outlined">pause</span> 暂停';
+  document.getElementById("countdownPauseBtn").innerHTML = `<span class="material-symbols-outlined">pause</span> ${t('btnPause')}`;
 
   countdownTimer = setInterval(() => {
     countdownRemaining--;
@@ -912,15 +919,15 @@ function pauseCountdown() {
     clearInterval(countdownTimer);
     countdownTimer = null;
     countdownIsPaused = true;
-    document.getElementById('countdownActiveStatus').textContent = '已暂停';
-    document.getElementById("countdownPauseBtn").innerHTML = '<span class="material-symbols-outlined">play_arrow</span> 继续';
+    document.getElementById('countdownActiveStatus').textContent = t('countdownPaused');
+    document.getElementById("countdownPauseBtn").innerHTML = `<span class="material-symbols-outlined">play_arrow</span> ${t('btnResume')}`;
   }
 }
 
 function resumeCountdown() {
   countdownIsPaused = false;
-  document.getElementById('countdownActiveStatus').textContent = '倒计时中...';
-  document.getElementById("countdownPauseBtn").innerHTML = '<span class="material-symbols-outlined">pause</span> 暂停';
+  document.getElementById('countdownActiveStatus').textContent = t('countdownStatus');
+  document.getElementById("countdownPauseBtn").innerHTML = `<span class="material-symbols-outlined">pause</span> ${t('btnPause')}`;
   
   countdownTimer = setInterval(() => {
     countdownRemaining--;
@@ -976,7 +983,7 @@ function resetCountdown() {
   countdownRemaining = 0;
   countdownTotalTime = 0;
   document.getElementById("countdownDisplay").textContent = "00:00:00";
-  document.getElementById("countdownPauseBtn").innerHTML = '<span class="material-symbols-outlined">pause</span> 暂停';
+  document.getElementById("countdownPauseBtn").innerHTML = `<span class="material-symbols-outlined">pause</span> ${t('btnPause')}`;
   
   // 重置进度条
   const circle = document.getElementById('countdownProgressCircle');
@@ -1166,15 +1173,15 @@ function initFocus() {
     const cancelBtn = document.getElementById('dialogCancelBtn');
 
     // 设置内容
-    dialogTitle.textContent = '自定义专注时间';
+    dialogTitle.textContent = t('customFocusTime');
     dialogIcon.textContent = 'schedule';
-    confirmBtn.textContent = '确定';
-    cancelBtn.textContent = '取消';
+    confirmBtn.textContent = t('dialogConfirm');
+    cancelBtn.textContent = t('dialogCancel');
     cancelBtn.style.display = 'block';
 
     // 创建输入框
     dialogMessage.innerHTML = `
-      <p class="mb-4">请输入专注时间（1-180分钟）</p>
+      <p class="mb-4">${t('customFocusPrompt')}</p>
       <input type="number" id="customFocusInput" min="1" max="180" value="30" 
         class="w-full rounded-lg border-[#f4ede7] dark:border-white/20 bg-white dark:bg-background-dark dark:text-white px-4 py-2 text-center text-2xl font-bold">
     `;
@@ -1242,11 +1249,11 @@ function startFocus() {
   // 切换到专注界面
   document.getElementById('focusSetup').classList.add('hidden');
   document.getElementById('focusActive').classList.remove('hidden');
-  document.getElementById('focusActiveStatus').textContent = '专注中...';
+  document.getElementById('focusActiveStatus').textContent = t('focusStatusActive');
   
   // 重置暂停按钮状态
   focusIsPaused = false;
-  document.getElementById('focusActivePauseBtn').innerHTML = '<span class="material-symbols-outlined">pause</span> 暂停';
+  document.getElementById('focusActivePauseBtn').innerHTML = `<span class="material-symbols-outlined">pause</span> ${t('btnPause')}`;
   
   focusTimer = setInterval(() => {
     focusRemaining--;
@@ -1293,15 +1300,15 @@ function pauseFocus() {
     clearInterval(focusTimer);
     focusTimer = null;
     focusIsPaused = true;
-    document.getElementById('focusActiveStatus').textContent = '已暂停';
-    document.getElementById('focusActivePauseBtn').innerHTML = '<span class="material-symbols-outlined">play_arrow</span> 继续';
+    document.getElementById('focusActiveStatus').textContent = t('focusStatusPaused');
+    document.getElementById('focusActivePauseBtn').innerHTML = `<span class="material-symbols-outlined">play_arrow</span> ${t('btnResume')}`;
   }
 }
 
 function resumeFocus() {
   focusIsPaused = false;
-  document.getElementById('focusActiveStatus').textContent = '专注中...';
-  document.getElementById('focusActivePauseBtn').innerHTML = '<span class="material-symbols-outlined">pause</span> 暂停';
+  document.getElementById('focusActiveStatus').textContent = t('focusStatusActive');
+  document.getElementById('focusActivePauseBtn').innerHTML = `<span class="material-symbols-outlined">pause</span> ${t('btnPause')}`;
   
   focusTimer = setInterval(() => {
     focusRemaining--;
@@ -1412,48 +1419,314 @@ function updateMotivationText(remaining, total) {
 
 // ========== 国际化支持 ==========
 function updateUIText() {
-  // 更新导航
-  document.querySelector('[data-page="reminders"] p').textContent = t('navReminders');
-  document.querySelector('[data-page="focus"] p').textContent = t('navFocus');
-  document.querySelector('[data-page="countdown"] p').textContent = t('navCountdown');
-  document.querySelector('[data-page="history"] p').textContent = t('navHistory');
-  document.querySelector('[data-page="settings"] p').textContent = t('navSettings');
+  try {
+    // 更新标题
+    document.title = t('appTitle');
+    
+    // 更新应用副标题
+    const appSubtitle = document.getElementById('appSubtitle');
+    if (appSubtitle) appSubtitle.textContent = t('appSubtitle');
+    
+    // 更新导航
+    const navRemindersText = document.getElementById('navRemindersText');
+    const navFocusText = document.getElementById('navFocusText');
+    const navCountdownText = document.getElementById('navCountdownText');
+    const navHistoryText = document.getElementById('navHistoryText');
+    const navSettingsText = document.getElementById('navSettingsText');
+    const navAbout = document.getElementById('navAbout');
+    
+    if (navRemindersText) navRemindersText.textContent = t('navReminders');
+    if (navFocusText) navFocusText.textContent = t('navFocus');
+    if (navCountdownText) navCountdownText.textContent = t('navCountdown');
+    if (navHistoryText) navHistoryText.textContent = t('navHistory');
+    if (navSettingsText) navSettingsText.textContent = t('navSettings');
+    if (navAbout) navAbout.textContent = t('navAbout');
+    
+    // 提醒页面
+    const remindersTitle = document.querySelector('#remindersPage h2');
+    const remindersSubtitle = document.querySelector('#remindersPage p');
+    const addReminderBtn = document.querySelector('#addReminderBtn');
+    
+    if (remindersTitle) remindersTitle.textContent = t('remindersTitle');
+    if (remindersSubtitle) remindersSubtitle.textContent = t('remindersSubtitle');
+    if (addReminderBtn) addReminderBtn.innerHTML = `<span class="material-symbols-outlined">add</span> ${t('btnNewReminder')}`;
+    
+    // 倒计时页面
+    const countdownTitle = document.querySelector('#countdownPage h2');
+    const countdownSubtitle = document.querySelector('#countdownSetup p');
+    const countdownStatus = document.querySelector('#countdownActiveStatus');
+    const countdownStartBtn = document.querySelector('#countdownStartBtn');
+    
+    if (countdownTitle) countdownTitle.textContent = t('countdownTitle');
+    if (countdownSubtitle) countdownSubtitle.textContent = t('countdownSubtitle');
+    if (countdownStatus) countdownStatus.textContent = t('countdownStatus');
+    if (countdownStartBtn) countdownStartBtn.innerHTML = `<span class="material-symbols-outlined">play_arrow</span> ${t('btnStart')}`;
+    
+    // 专注时间页面
+    const focusTitle = document.querySelector('#focusPage h2');
+    const focusSubtitle = document.querySelector('#focusSetup p');
+    const focusStatus = document.querySelector('#focusStatus');
+    const focusMotivation = document.querySelector('#focusMotivation');
+    const focusActiveStatus = document.querySelector('#focusActiveStatus');
+    const focusStartBtn = document.querySelector('#focusStartBtn');
+    
+    if (focusTitle) focusTitle.textContent = t('focusTitle');
+    if (focusSubtitle) focusSubtitle.textContent = t('focusSubtitle');
+    if (focusStatus) focusStatus.textContent = t('focusStatus');
+    if (focusMotivation) focusMotivation.textContent = t('motivationStart');
+    if (focusActiveStatus) focusActiveStatus.textContent = t('focusStatusActive');
+    if (focusStartBtn) focusStartBtn.innerHTML = `<span class="material-symbols-outlined">play_arrow</span> ${t('btnStartFocus')}`;
+    
+    // 历史记录页面
+    const historyTitle = document.querySelector('#historyPage h2');
+    const historySubtitle = document.querySelector('#historyPage > div > p');
+    
+    if (historyTitle) historyTitle.textContent = t('historyTitle');
+    if (historySubtitle) historySubtitle.textContent = t('historySubtitle');
+    
+    // 设置页面
+    const settingsTitle = document.querySelector('#settingsPage h2');
+    const settingsSubtitle = document.querySelector('#settingsPage > div > p');
+    const settingsGeneralTitle = document.getElementById('settingsGeneralTitle');
+    const settingsNotificationTitle = document.getElementById('settingsNotificationTitle');
+    const settingsAppearanceTitle = document.getElementById('settingsAppearanceTitle');
+    const settingsDataTitle = document.getElementById('settingsDataTitle');
+    const darkModeLabel = document.getElementById('settingDarkModeLabel');
+    const darkModeDesc = document.getElementById('settingDarkModeDesc');
+    const languageLabel = document.getElementById('settingLanguageLabel');
+    const languageDesc = document.getElementById('settingLanguageDesc');
+    
+    if (settingsTitle) settingsTitle.textContent = t('settingsTitle');
+    if (settingsSubtitle) settingsSubtitle.textContent = t('settingsSubtitle');
+    if (settingsGeneralTitle) settingsGeneralTitle.textContent = t('settingsGeneral');
+    if (settingsNotificationTitle) settingsNotificationTitle.textContent = t('settingsNotification');
+    if (settingsAppearanceTitle) settingsAppearanceTitle.textContent = t('settingsAppearance');
+    if (settingsDataTitle) settingsDataTitle.textContent = t('settingsData');
+    if (darkModeLabel) darkModeLabel.textContent = t('settingDarkMode');
+    if (darkModeDesc) darkModeDesc.textContent = t('settingDarkModeDesc');
+    if (languageLabel) languageLabel.textContent = t('settingLanguage');
+    if (languageDesc) languageDesc.textContent = t('settingLanguageDesc');
+    
+    // 通用设置项
+    const settingDefaultIntervalLabel = document.getElementById('settingDefaultIntervalLabel');
+    const settingDefaultIntervalDesc = document.getElementById('settingDefaultIntervalDesc');
+    const settingAutoStartLabel = document.getElementById('settingAutoStartLabel');
+    const settingAutoStartDesc = document.getElementById('settingAutoStartDesc');
+    const unitMinutesLabel1 = document.getElementById('unitMinutesLabel1');
+    
+    if (settingDefaultIntervalLabel) settingDefaultIntervalLabel.textContent = t('settingDefaultInterval');
+    if (settingDefaultIntervalDesc) settingDefaultIntervalDesc.textContent = t('settingDefaultIntervalDesc');
+    if (settingAutoStartLabel) settingAutoStartLabel.textContent = t('settingAutoStart');
+    if (settingAutoStartDesc) settingAutoStartDesc.textContent = t('settingAutoStartDesc');
+    if (unitMinutesLabel1) unitMinutesLabel1.textContent = t('unitMinutes');
+    
+    // 通知设置项
+    const settingNotificationLabel = document.getElementById('settingNotificationLabel');
+    const settingNotificationDesc = document.getElementById('settingNotificationDesc');
+    const settingSoundLabel = document.getElementById('settingSoundLabel');
+    const settingSoundDesc = document.getElementById('settingSoundDesc');
+    const settingSoundSelectLabel = document.getElementById('settingSoundSelectLabel');
+    const settingSoundSelectDesc = document.getElementById('settingSoundSelectDesc');
+    
+    if (settingNotificationLabel) settingNotificationLabel.textContent = t('settingEnableNotification');
+    if (settingNotificationDesc) settingNotificationDesc.textContent = t('settingEnableNotificationDesc');
+    if (settingSoundLabel) settingSoundLabel.textContent = t('settingEnableSound');
+    if (settingSoundDesc) settingSoundDesc.textContent = t('settingEnableSoundDesc');
+    if (settingSoundSelectLabel) settingSoundSelectLabel.textContent = t('settingSelectSound');
+    if (settingSoundSelectDesc) settingSoundSelectDesc.textContent = t('settingSelectSoundDesc');
+    
+    // 数据设置项
+    const settingClearHistoryLabel = document.getElementById('settingClearHistoryLabel');
+    const settingClearHistoryDesc = document.getElementById('settingClearHistoryDescText');
+    const btnClearHistoryText = document.getElementById('btnClearHistoryText');
+    
+    if (settingClearHistoryLabel) settingClearHistoryLabel.textContent = t('settingClearHistory');
+    if (settingClearHistoryDesc) settingClearHistoryDesc.textContent = t('settingClearHistoryDesc');
+    if (btnClearHistoryText) btnClearHistoryText.textContent = t('btnClearHistory');
+    
+    // 显示窗口设置
+    const settingShowWindowLabel = document.getElementById('settingShowWindowLabel');
+    const settingShowWindowDesc = document.getElementById('settingShowWindowDesc');
+    
+    if (settingShowWindowLabel) settingShowWindowLabel.textContent = t('settingShowWindow');
+    if (settingShowWindowDesc) settingShowWindowDesc.textContent = t('settingShowWindowDesc');
+    
+    // 音效选项
+    const sound1 = document.getElementById('sound1');
+    const sound2 = document.getElementById('sound2');
+    const sound3 = document.getElementById('sound3');
+    const sound4 = document.getElementById('sound4');
+    const sound5 = document.getElementById('sound5');
+    const sound6 = document.getElementById('sound6');
+    const sound7 = document.getElementById('sound7');
+    const sound8 = document.getElementById('sound8');
+    
+    if (sound1) sound1.textContent = t('sound1');
+    if (sound2) sound2.textContent = t('sound2');
+    if (sound3) sound3.textContent = t('sound3');
+    if (sound4) sound4.textContent = t('sound4');
+    if (sound5) sound5.textContent = t('sound5');
+    if (sound6) sound6.textContent = t('sound6');
+    if (sound7) sound7.textContent = t('sound7');
+    if (sound8) sound8.textContent = t('sound8');
+    
+    // 语言选项
+    const langZhCN = document.getElementById('langZhCN');
+    const langEnUS = document.getElementById('langEnUS');
+    
+    if (langZhCN) langZhCN.textContent = t('languageZhCN');
+    if (langEnUS) langEnUS.textContent = t('languageEnUS');
+    
+    // 更新统计标签
+    const completedLabel = document.getElementById('completedLabel');
+    const pendingLabel = document.getElementById('pendingLabel');
+    if (completedLabel) completedLabel.textContent = t('todayCompleted');
+    if (pendingLabel) pendingLabel.textContent = t('todayPending');
+    
+    // 更新提醒页面标题和按钮
+    const remindersPageTitle = document.getElementById('remindersTitle');
+    const remindersPageSubtitle = document.getElementById('remindersSubtitle');
+    const btnNewReminderText = document.getElementById('btnNewReminderText');
+    if (remindersPageTitle) remindersPageTitle.textContent = t('remindersTitle');
+    if (remindersPageSubtitle) remindersPageSubtitle.textContent = t('remindersSubtitle');
+    if (btnNewReminderText) btnNewReminderText.textContent = t('btnNewReminder');
+    
+    // 更新倒计时页面
+    const countdownPageTitle = document.getElementById('countdownTitle');
+    const countdownPageSubtitle = document.getElementById('countdownSubtitle');
+    const labelHoursText = document.getElementById('labelHoursText');
+    const labelMinutesText = document.getElementById('labelMinutesText');
+    const labelSecondsText = document.getElementById('labelSecondsText');
+    const btnStartText = document.getElementById('btnStartText');
+    
+    if (countdownPageTitle) countdownPageTitle.textContent = t('countdownTitle');
+    if (countdownPageSubtitle) countdownPageSubtitle.textContent = t('countdownSubtitle');
+    if (labelHoursText) labelHoursText.textContent = t('labelHours');
+    if (labelMinutesText) labelMinutesText.textContent = t('labelMinutes');
+    if (labelSecondsText) labelSecondsText.textContent = t('labelSeconds');
+    if (btnStartText) btnStartText.textContent = t('btnStart');
+    
+    // 更新专注时间页面
+    const focusPageTitle = document.getElementById('focusTitle');
+    const focusPageSubtitle = document.getElementById('focusSubtitle');
+    const unitMinutesLabel2 = document.getElementById('unitMinutesLabel2');
+    const unitMinutesLabel3 = document.getElementById('unitMinutesLabel3');
+    const unitMinutesLabel4 = document.getElementById('unitMinutesLabel4');
+    const btnCustomText = document.getElementById('btnCustomText');
+    const btnStartFocusText = document.getElementById('btnStartFocusText');
+    
+    if (focusPageTitle) focusPageTitle.textContent = t('focusTitle');
+    if (focusPageSubtitle) focusPageSubtitle.textContent = t('focusSubtitle');
+    if (unitMinutesLabel2) unitMinutesLabel2.textContent = t('unitMinutes');
+    if (unitMinutesLabel3) unitMinutesLabel3.textContent = t('unitMinutes');
+    if (unitMinutesLabel4) unitMinutesLabel4.textContent = t('unitMinutes');
+    if (btnCustomText) btnCustomText.textContent = t('btnCustom');
+    if (btnStartFocusText) btnStartFocusText.textContent = t('btnStartFocus');
+    
+    // 更新历史记录页面
+    const historyPageTitle = document.getElementById('historyTitle');
+    const historyPageSubtitle = document.getElementById('historySubtitle');
+    if (historyPageTitle) historyPageTitle.textContent = t('historyTitle');
+    if (historyPageSubtitle) historyPageSubtitle.textContent = t('historySubtitle');
+    
+    // 更新关于页面
+    const aboutTitleText = document.getElementById('aboutTitleText');
+    const aboutVersionLabel = document.getElementById('aboutVersionLabel');
+    const aboutDescriptionText = document.getElementById('aboutDescriptionText');
+    const aboutFeaturesTitle = document.getElementById('aboutFeaturesTitle');
+    const aboutFeature1 = document.getElementById('aboutFeature1');
+    const aboutFeature2 = document.getElementById('aboutFeature2');
+    const aboutFeature3 = document.getElementById('aboutFeature3');
+    const aboutFeature4 = document.getElementById('aboutFeature4');
+    
+    if (aboutTitleText) aboutTitleText.textContent = t('aboutTitle');
+    if (aboutVersionLabel) aboutVersionLabel.textContent = t('aboutVersion');
+    if (aboutDescriptionText) aboutDescriptionText.innerHTML = t('aboutDescription') + '<br />' + t('aboutSubDescription');
+    if (aboutFeaturesTitle) aboutFeaturesTitle.textContent = t('aboutFeaturesTitle');
+    if (aboutFeature1) aboutFeature1.textContent = t('aboutFeature1');
+    if (aboutFeature2) aboutFeature2.textContent = t('aboutFeature2');
+    if (aboutFeature3) aboutFeature3.textContent = t('aboutFeature3');
+    if (aboutFeature4) aboutFeature4.textContent = t('aboutFeature4');
+    
+    const aboutFeature5 = document.getElementById('aboutFeature5');
+    if (aboutFeature5) aboutFeature5.textContent = t('aboutFeature5');
+    
+    // 更新按钮文本
+    const btnPauseText = document.getElementById('btnPauseText');
+    const btnResetText = document.getElementById('btnResetText');
+    const btnFocusPauseText = document.getElementById('btnFocusPauseText');
+    const btnStopText = document.getElementById('btnStopText');
   
-  // 更新标题
-  document.title = t('appTitle');
-  
-  // 提醒页面
-  document.querySelector('#remindersPage h2').textContent = t('remindersTitle');
-  document.querySelector('#remindersPage p').textContent = t('remindersSubtitle');
-  document.querySelector('#addReminderBtn').innerHTML = `<span class="material-symbols-outlined">add</span> ${t('btnNewReminder')}`;
-  
-  // 倒计时页面
-  document.querySelector('#countdownPage h2').textContent = t('countdownTitle');
-  document.querySelectorAll('#countdownPage > div > p')[0].textContent = t('countdownSubtitle');
-  document.querySelector('#countdownActiveStatus').textContent = t('countdownStatus');
-  
-  // 专注时间页面
-  document.querySelector('#focusPage h2').textContent = t('focusTitle');
-  document.querySelectorAll('#focusPage p')[0].textContent = t('focusSubtitle');
-  document.querySelector('#focusStatus').textContent = t('focusStatus');
-  document.querySelector('#focusMotivation').textContent = t('motivationStart');
-  document.querySelector('#focusActiveStatus').textContent = t('focusStatusActive');
-  
-  // 历史记录页面
-  document.querySelector('#historyPage h2').textContent = t('historyTitle');
-  document.querySelectorAll('#historyPage p')[0].textContent = t('historySubtitle');
-  
-  // 设置页面
-  document.querySelector('#settingsPage h2').textContent = t('settingsTitle');
-  document.querySelectorAll('#settingsPage > div > p')[0].textContent = t('settingsSubtitle');
-  document.getElementById('settingDarkModeLabel').textContent = t('settingDarkMode');
-  document.getElementById('settingDarkModeDesc').textContent = t('settingDarkModeDesc');
-  document.getElementById('settingLanguageLabel').textContent = t('settingLanguage');
-  document.getElementById('settingLanguageDesc').textContent = t('settingLanguageDesc');
-  
-  // 按钮文本
-  document.querySelector('#countdownStartBtn').innerHTML = `<span class="material-symbols-outlined">play_arrow</span> ${t('btnStart')}`;
-  document.querySelector('#focusStartBtn').innerHTML = `<span class="material-symbols-outlined">play_arrow</span> ${t('btnStartFocus')}`;
+    
+    if (btnPauseText) btnPauseText.textContent = t('btnPause');
+    if (btnResetText) btnResetText.textContent = t('btnReset');
+    if (btnFocusPauseText) btnFocusPauseText.textContent = t('btnPause');
+    if (btnStopText) btnStopText.textContent = t('btnStop');
+    if (unitMinutesLabel1) unitMinutesLabel1.textContent = t('unitMinutes');
+    
+    // 更新弹窗文本
+    const modalTitle = document.getElementById('modalTitle');
+    const labelReminderTypeText = document.getElementById('labelReminderTypeText');
+    const labelCustomTextLabel = document.getElementById('labelCustomTextLabel');
+    const labelTimeText = document.getElementById('labelTimeText');
+    const labelRepeatTypeText = document.getElementById('labelRepeatTypeText');
+    const labelIntervalText = document.getElementById('labelIntervalText');
+    const labelNoteText = document.getElementById('labelNoteText');
+    const btnCancelText = document.getElementById('btnCancelText');
+    const btnSaveText = document.getElementById('btnSaveText');
+    
+    if (modalTitle) modalTitle.textContent = t('modalNewReminder');
+    if (labelReminderTypeText) labelReminderTypeText.textContent = t('labelReminderType');
+    if (labelCustomTextLabel) labelCustomTextLabel.textContent = t('labelCustomText');
+    if (labelTimeText) labelTimeText.textContent = t('labelTime');
+    if (labelRepeatTypeText) labelRepeatTypeText.textContent = t('labelRepeatType');
+    if (labelIntervalText) labelIntervalText.textContent = t('labelInterval');
+    if (labelNoteText) labelNoteText.textContent = t('labelNote');
+    if (btnCancelText) btnCancelText.textContent = t('dialogCancel');
+    if (btnSaveText) btnSaveText.textContent = t('btnSave');
+    
+    // 更新下拉选项
+    const optionWater = document.getElementById('optionWater');
+    const optionStandup = document.getElementById('optionStandup');
+    const optionExercise = document.getElementById('optionExercise');
+    const optionEye = document.getElementById('optionEye');
+    const optionCustom = document.getElementById('optionCustom');
+    const optionOnce = document.getElementById('optionOnce');
+    const optionDaily = document.getElementById('optionDaily');
+    const optionWeekday = document.getElementById('optionWeekday');
+    const optionWeekend = document.getElementById('optionWeekend');
+    const optionInterval = document.getElementById('optionInterval');
+    
+    if (optionWater) optionWater.textContent = t('reminderTypeWater');
+    if (optionStandup) optionStandup.textContent = t('reminderTypeStandup');
+    if (optionExercise) optionExercise.textContent = t('reminderTypeExercise');
+    if (optionEye) optionEye.textContent = t('reminderTypeEye');
+    if (optionCustom) optionCustom.textContent = t('reminderTypeCustom');
+    if (optionOnce) optionOnce.textContent = t('repeatOnce');
+    if (optionDaily) optionDaily.textContent = t('repeatDaily');
+    if (optionWeekday) optionWeekday.textContent = t('repeatWeekday');
+    if (optionWeekend) optionWeekend.textContent = t('repeatWeekend');
+    if (optionInterval) optionInterval.textContent = t('repeatInterval');
+    
+    // 更新历史记录筛选器选项
+    const filterAll = document.getElementById('filterAll');
+    const filterWater = document.getElementById('filterWater');
+    const filterStandup = document.getElementById('filterStandup');
+    const filterExercise = document.getElementById('filterExercise');
+    const filterEye = document.getElementById('filterEye');
+    const filterCustom = document.getElementById('filterCustom');
+    
+    if (filterAll) filterAll.textContent = t('filterAll');
+    if (filterWater) filterWater.textContent = t('reminderTypeWater');
+    if (filterStandup) filterStandup.textContent = t('reminderTypeStandup');
+    if (filterExercise) filterExercise.textContent = t('reminderTypeExercise');
+    if (filterEye) filterEye.textContent = t('reminderTypeEye');
+    if (filterCustom) filterCustom.textContent = t('reminderTypeCustom');
+    
+    console.log('UI text updated to:', getCurrentLanguage());
+  } catch (error) {
+    console.error('Error updating UI text:', error);
+  }
 }
 
 // 更新提醒类型文本
