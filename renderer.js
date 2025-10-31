@@ -54,11 +54,7 @@ function loadData() {
   const savedHistory = localStorage.getItem("history");
   const savedSettings = localStorage.getItem("settings");
 
-  console.log("加载数据:", {
-    reminders: savedReminders ? JSON.parse(savedReminders).length : 0,
-    history: savedHistory ? JSON.parse(savedHistory).length : 0,
-    settings: savedSettings ? "exists" : "none",
-  });
+
 
   if (savedReminders) reminders = JSON.parse(savedReminders);
   if (savedHistory) history = JSON.parse(savedHistory);
@@ -85,10 +81,6 @@ function loadData() {
 
 // 保存数据
 function saveData() {
-  console.log("保存数据:", {
-    reminders: reminders.length,
-    history: history.length,
-  });
   localStorage.setItem("reminders", JSON.stringify(reminders));
   localStorage.setItem("history", JSON.stringify(history));
   localStorage.setItem("settings", JSON.stringify(settings));
@@ -272,7 +264,6 @@ function saveReminder() {
     // 编辑模式：更新现有提醒
     const reminder = reminders.find((r) => r.id === parseInt(editId));
     if (reminder) {
-      console.log('编辑提醒 ID:', editId, '当前总数:', reminders.length);
       reminder.type = type;
       reminder.customText = customText;
       reminder.time = time;
@@ -284,9 +275,7 @@ function saveReminder() {
         repeatType,
         intervalMinutes
       );
-      console.log('编辑后总数:', reminders.length);
     } else {
-      console.error('未找到要编辑的提醒 ID:', editId, '现有提醒:', reminders.map(r => r.id));
       showDialog({
         title: '错误',
         message: '未找到要编辑的提醒',
@@ -297,7 +286,6 @@ function saveReminder() {
     }
   } else {
     // 新建模式：创建新提醒
-    console.log('新建提醒，当前总数:', reminders.length);
     const reminder = {
       id: Date.now(),
       type,
@@ -311,7 +299,6 @@ function saveReminder() {
       nextTrigger: calculateNextTrigger(time, repeatType, intervalMinutes),
     };
     reminders.push(reminder);
-    console.log('新建后总数:', reminders.length, '新ID:', reminder.id);
   }
 
   saveData();
@@ -342,7 +329,6 @@ function calculateNextTrigger(time, repeatType, intervalMinutes) {
 
 // 渲染提醒列表
 function renderReminders() {
-  console.log('渲染提醒列表，总数:', reminders.length, '数据:', reminders.map(r => ({id: r.id, type: r.type, enabled: r.enabled})));
   const list = document.getElementById("reminderList");
 
   if (reminders.length === 0) {
@@ -469,7 +455,6 @@ function toggleReminder(id, enabled) {
   const reminder = reminders.find((r) => r.id === id);
   if (reminder) {
     reminder.enabled = enabled;
-    console.log('切换提醒:', id, '状态:', enabled);
     saveData();
     renderReminders();
     updateStats();

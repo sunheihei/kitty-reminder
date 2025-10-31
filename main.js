@@ -42,9 +42,6 @@ function createWindow() {
 
   mainWindow.loadFile("index.html");
 
-  // 开发时打开开发者工具
-  // mainWindow.webContents.openDevTools();
-
   // 关闭窗口时隐藏到托盘而不是退出
   mainWindow.on("close", (event) => {
     if (!app.isQuitting) {
