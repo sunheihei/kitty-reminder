@@ -488,15 +488,14 @@ function checkReminders() {
     const nextTrigger = new Date(reminder.nextTrigger);
 
     if (now >= nextTrigger) {
-      triggerReminder(reminder);
-
+      // 先更新下次触发时间，防止重复触发
       if (reminder.repeatType === "interval") {
         reminder.nextTrigger = new Date(
-          now.getTime() + reminder.intervalMinutes * 60000
+          nextTrigger.getTime() + reminder.intervalMinutes * 60000
         ).toISOString();
       } else if (reminder.repeatType !== "once") {
         const [hours, minutes] = reminder.time.split(":").map(Number);
-        const next = new Date();
+        const next = new Date(nextTrigger);
         next.setDate(next.getDate() + 1);
         next.setHours(hours, minutes, 0, 0);
         reminder.nextTrigger = next.toISOString();
@@ -506,6 +505,9 @@ function checkReminders() {
 
       reminder.lastTriggered = now.toISOString();
       saveData();
+      
+      // 最后触发提醒
+      triggerReminder(reminder);
     }
   });
 }

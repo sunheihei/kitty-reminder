@@ -1,0 +1,101 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # 当推送 v 开头的标签时触发，如 v1.0.0
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Build Windows
+        if: matrix.os == 'windows-latest'
+        run: npm run package:win
+      
+      - name: Build macOS
+        if: matrix.os == 'macos-latest'
+        run: npm run package:mac
+      
+      - name: Build Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run package:linux
+      
+      - name: Compress Windows build
+        if: matrix.os == 'windows-latest'
+        run: |
+          Compress-Archive -Path "release/Kitty Reminder-win32-x64" -DestinationPath "Kitty-Reminder-Windows-x64.zip"
+        shell: pwsh
+      
+      - name: Compress macOS build (x64)
+        if: matrix.os == 'macos-latest'
+        run: |
+          cd release
+          zip -r ../Kitty-Reminder-macOS-x64.zip "Kitty Reminder-darwin-x64"
+          zip -r ../Kitty-Reminder-macOS-arm64.zip "Kitty Reminder-darwin-arm64"
+      
+      - name: Compress Linux build
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd release
+          tar -czf ../Kitty-Reminder-Linux-x64.tar.gz "Kitty Reminder-linux-x64"
+      
+      - name: Upload Windows artifact
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-build
+          path: Kitty-Reminder-Windows-x64.zip
+      
+      - name: Upload macOS artifacts
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-build
+          path: |
+            Kitty-Reminder-macOS-x64.zip
+            Kitty-Reminder-macOS-arm64.zip
+      
+      - name: Upload Linux artifact
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-build
+          path: Kitty-Reminder-Linux-x64.tar.gz
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            windows-build/Kitty-Reminder-Windows-x64.zip
+            macos-build/Kitty-Reminder-macOS-x64.zip
+            macos-build/Kitty-Reminder-macOS-arm64.zip
+            linux-build/Kitty-Reminder-Linux-x64.tar.gz
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
