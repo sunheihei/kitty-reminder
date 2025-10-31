@@ -827,6 +827,7 @@ function showDialog(options) {
 
 // ========== 倒计时功能 ==========
 let countdownIsPaused = false;
+let countdownTotalTime = 0;
 
 function initCountdown() {
   document
@@ -868,14 +869,24 @@ function startCountdown() {
     return;
   }
 
+  // 保存总时间
+  countdownTotalTime = countdownRemaining;
+  
+  // 切换到倒计时界面
+  document.getElementById('countdownSetup').classList.add('hidden');
+  document.getElementById('countdownActive').classList.remove('hidden');
+  document.getElementById('countdownActiveStatus').textContent = '倒计时中...';
+  
+  // 重置进度条
+  updateCountdownProgress();
+  
   countdownIsPaused = false;
-  document.getElementById("countdownStartBtn").classList.add("hidden");
-  document.getElementById("countdownPauseBtn").classList.remove("hidden");
   document.getElementById("countdownPauseBtn").innerHTML = '<span class="material-symbols-outlined">pause</span> 暂停';
 
   countdownTimer = setInterval(() => {
     countdownRemaining--;
-    updateCountdownDisplay();
+    updateCountdownActiveDisplay();
+    updateCountdownProgress();
 
     if (countdownRemaining <= 0) {
       clearInterval(countdownTimer);
@@ -890,7 +901,7 @@ function startCountdown() {
           const { ipcRenderer } = require('electron');
           ipcRenderer.send('show-notification', {
             title: '倒计时结束',
-            body: '时间到！⏰',
+            body: '时间到！',
             reminderId: Date.now(),
             playSound: false,
             icon: 'assets/image/countdown.png'
@@ -904,9 +915,10 @@ function startCountdown() {
         message: "时间到！",
         icon: "alarm",
         showCancel: false,
+        onConfirm: () => {
+          resetCountdown();
+        }
       });
-      
-      resetCountdown();
     }
   }, 1000);
 }
@@ -916,17 +928,20 @@ function pauseCountdown() {
     clearInterval(countdownTimer);
     countdownTimer = null;
     countdownIsPaused = true;
+    document.getElementById('countdownActiveStatus').textContent = '已暂停';
     document.getElementById("countdownPauseBtn").innerHTML = '<span class="material-symbols-outlined">play_arrow</span> 继续';
   }
 }
 
 function resumeCountdown() {
   countdownIsPaused = false;
+  document.getElementById('countdownActiveStatus').textContent = '倒计时中...';
   document.getElementById("countdownPauseBtn").innerHTML = '<span class="material-symbols-outlined">pause</span> 暂停';
   
   countdownTimer = setInterval(() => {
     countdownRemaining--;
-    updateCountdownDisplay();
+    updateCountdownActiveDisplay();
+    updateCountdownProgress();
 
     if (countdownRemaining <= 0) {
       clearInterval(countdownTimer);
@@ -941,7 +956,7 @@ function resumeCountdown() {
           const { ipcRenderer } = require('electron');
           ipcRenderer.send('show-notification', {
             title: '倒计时结束',
-            body: '时间到！⏰',
+            body: '时间到！',
             reminderId: Date.now(),
             playSound: false,
             icon: 'assets/image/countdown.png'
@@ -955,9 +970,10 @@ function resumeCountdown() {
         message: "时间到！",
         icon: "alarm",
         showCancel: false,
+        onConfirm: () => {
+          resetCountdown();
+        }
       });
-      
-      resetCountdown();
     }
   }, 1000);
 }
@@ -967,12 +983,20 @@ function resetCountdown() {
     clearInterval(countdownTimer);
     countdownTimer = null;
   }
+  
+  // 切换回设置界面
+  document.getElementById('countdownSetup').classList.remove('hidden');
+  document.getElementById('countdownActive').classList.add('hidden');
+  
   countdownIsPaused = false;
   countdownRemaining = 0;
+  countdownTotalTime = 0;
   document.getElementById("countdownDisplay").textContent = "00:00:00";
-  document.getElementById("countdownStartBtn").classList.remove("hidden");
-  document.getElementById("countdownPauseBtn").classList.add("hidden");
   document.getElementById("countdownPauseBtn").innerHTML = '<span class="material-symbols-outlined">pause</span> 暂停';
+  
+  // 重置进度条
+  const circle = document.getElementById('countdownProgressCircle');
+  circle.style.strokeDashoffset = 910.6;
 }
 
 function updateCountdownDisplay() {
@@ -985,6 +1009,30 @@ function updateCountdownDisplay() {
   ).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
     seconds
   ).padStart(2, "0")}`;
+}
+
+function updateCountdownActiveDisplay() {
+  const hours = Math.floor(countdownRemaining / 3600);
+  const minutes = Math.floor((countdownRemaining % 3600) / 60);
+  const seconds = countdownRemaining % 60;
+
+  document.getElementById("countdownActiveDisplay").textContent = `${String(
+    hours
+  ).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
+    seconds
+  ).padStart(2, "0")}`;
+  
+  // 更新进度百分比
+  const progressPercent = Math.round(((countdownTotalTime - countdownRemaining) / countdownTotalTime) * 100);
+  document.getElementById('countdownProgress').textContent = `${progressPercent}%`;
+}
+
+function updateCountdownProgress() {
+  const circle = document.getElementById('countdownProgressCircle');
+  const circumference = 2 * Math.PI * 145;
+  const progress = countdownRemaining / countdownTotalTime;
+  const offset = circumference * (1 - progress);
+  circle.style.strokeDashoffset = offset;
 }
 
 // ========== 专注时间功能（重写） ==========
@@ -1234,7 +1282,7 @@ function startFocus() {
           const { ipcRenderer } = require('electron');
           ipcRenderer.send('show-notification', {
             title: '专注时间结束',
-            body: '做得好！完成了一次专注 🎉',
+            body: '做得好！完成了一次专注',
             reminderId: Date.now(),
             playSound: false,
             icon: 'assets/image/focus.png'
@@ -1289,7 +1337,7 @@ function resumeFocus() {
           const { ipcRenderer } = require('electron');
           ipcRenderer.send('show-notification', {
             title: '专注时间结束',
-            body: '做得好！完成了一次专注 🎉',
+            body: '做得好！完成了一次专注',
             reminderId: Date.now(),
             playSound: false,
             icon: 'assets/image/focus.png'
@@ -1330,7 +1378,7 @@ function stopFocus() {
   
   // 重置进度条
   const circle = document.getElementById('focusProgressCircle');
-  circle.style.strokeDashoffset = 879.6; // 完全重置
+  circle.style.strokeDashoffset = 910.6; // 完全重置 (2 * Math.PI * 145)
 }
 
 function updateFocusDisplay() {
@@ -1343,12 +1391,36 @@ function updateFocusActiveDisplay() {
   const minutes = Math.floor(focusRemaining / 60);
   const seconds = focusRemaining % 60;
   document.getElementById('focusActiveDisplay').textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  
+  // 更新进度百分比
+  const progressPercent = Math.round(((focusTotalTime - focusRemaining) / focusTotalTime) * 100);
+  document.getElementById('focusProgress').textContent = `${progressPercent}%`;
+  
+  // 更新激励文字
+  updateMotivationText(focusRemaining, focusTotalTime);
 }
 
 function updateFocusProgress() {
   const circle = document.getElementById('focusProgressCircle');
-  const circumference = 2 * Math.PI * 140; // 2πr
+  const circumference = 2 * Math.PI * 145; // 2πr (半径改为145)
   const progress = focusRemaining / focusTotalTime;
   const offset = circumference * (1 - progress);
   circle.style.strokeDashoffset = offset;
+}
+
+function updateMotivationText(remaining, total) {
+  const progress = (total - remaining) / total;
+  const motivationEl = document.getElementById('focusMotivation');
+  
+  if (progress < 0.25) {
+    motivationEl.textContent = '很好的开始，保持专注！';
+  } else if (progress < 0.5) {
+    motivationEl.textContent = '做得很棒，继续加油！';
+  } else if (progress < 0.75) {
+    motivationEl.textContent = '已经过半了，坚持住！';
+  } else if (progress < 0.9) {
+    motivationEl.textContent = '马上就要完成了！';
+  } else {
+    motivationEl.textContent = '最后冲刺，胜利在望！';
+  }
 }
