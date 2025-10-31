@@ -80,6 +80,10 @@ const translations = {
     settingsAppearance: '外观设置',
     settingDarkMode: '深色模式',
     settingDarkModeDesc: '使用深色主题',
+    settingLanguage: '语言',
+    settingLanguageDesc: '选择界面语言',
+    languageZhCN: '简体中文',
+    languageEnUS: 'English',
     
     // 设置 - 数据
     settingsData: '数据设置',
@@ -232,6 +236,10 @@ const translations = {
     settingsAppearance: 'Appearance',
     settingDarkMode: 'Dark Mode',
     settingDarkModeDesc: 'Use dark theme',
+    settingLanguage: 'Language',
+    settingLanguageDesc: 'Select interface language',
+    languageZhCN: '简体中文',
+    languageEnUS: 'English',
     
     // Settings - Data
     settingsData: 'Data',
@@ -334,8 +342,15 @@ function initLanguage() {
   if (savedLang && translations[savedLang]) {
     currentLanguage = savedLang;
   } else {
-    // 默认使用英文
-    currentLanguage = 'en-US';
+    // 检测系统语言
+    const systemLang = navigator.language || navigator.userLanguage;
+    if (systemLang.startsWith('zh')) {
+      currentLanguage = 'zh-CN';
+    } else {
+      currentLanguage = 'en-US';
+    }
+    // 保存检测到的语言
+    localStorage.setItem('language', currentLanguage);
   }
 }
 

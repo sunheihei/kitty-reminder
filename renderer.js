@@ -71,6 +71,11 @@ function loadData() {
       document.documentElement.classList.add("dark");
       document.getElementById("darkModeToggle").checked = true;
     }
+    // 加载语言设置
+    if (settings.language) {
+      setLanguage(settings.language);
+      document.getElementById("languageSelect").value = settings.language;
+    }
   }
 
   document.getElementById("defaultInterval").value = settings.defaultInterval;
@@ -81,6 +86,9 @@ function loadData() {
   document.getElementById("showWindowOnClick").checked =
     settings.showWindowOnClick;
   document.getElementById("autoStart").checked = settings.autoStart;
+  
+  // 设置语言选择器的当前值
+  document.getElementById("languageSelect").value = getCurrentLanguage();
 
   // 根据音效开关状态显示/隐藏音效选择
   toggleSoundSelect();
@@ -174,6 +182,17 @@ function initEventListeners() {
     document.documentElement.classList.toggle("dark", e.target.checked);
     settings.darkMode = e.target.checked;
     saveData();
+  });
+  
+  // 语言切换
+  document.getElementById("languageSelect").addEventListener("change", (e) => {
+    const newLang = e.target.value;
+    setLanguage(newLang);
+    settings.language = newLang;
+    saveData();
+    updateUIText();
+    renderReminders();
+    renderHistory();
   });
 
   // 历史筛选
@@ -1427,6 +1446,10 @@ function updateUIText() {
   // 设置页面
   document.querySelector('#settingsPage h2').textContent = t('settingsTitle');
   document.querySelectorAll('#settingsPage > div > p')[0].textContent = t('settingsSubtitle');
+  document.getElementById('settingDarkModeLabel').textContent = t('settingDarkMode');
+  document.getElementById('settingDarkModeDesc').textContent = t('settingDarkModeDesc');
+  document.getElementById('settingLanguageLabel').textContent = t('settingLanguage');
+  document.getElementById('settingLanguageDesc').textContent = t('settingLanguageDesc');
   
   // 按钮文本
   document.querySelector('#countdownStartBtn').innerHTML = `<span class="material-symbols-outlined">play_arrow</span> ${t('btnStart')}`;
