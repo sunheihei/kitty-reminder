@@ -9,6 +9,7 @@ let settings = {
   showWindowOnClick: true,
   autoStart: false,
   darkMode: false,
+  language: "en-US", // 默认英文
 };
 
 // 倒计时和专注时间的状态
@@ -20,6 +21,9 @@ let focusMode = "work"; // 'work' or 'break'
 
 // 初始化
 document.addEventListener("DOMContentLoaded", () => {
+  // 初始化语言
+  initLanguage();
+  
   loadData();
   initEventListeners();
   updateStats();
@@ -30,6 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // 初始化倒计时和专注时间
   initCountdown();
   initFocus();
+  
+  // 更新界面文本
+  updateUIText();
 
   // 监听来自主进程的通知操作
   if (typeof require !== "undefined") {
@@ -238,8 +245,8 @@ function saveReminder() {
 
   if (!time) {
     showDialog({
-      title: "提示",
-      message: "请选择提醒时间",
+      title: t('dialogTitle'),
+      message: t('msgSetTime'),
       icon: "schedule",
       showCancel: false,
     });
@@ -248,8 +255,8 @@ function saveReminder() {
 
   if (type === "custom" && !customText) {
     showDialog({
-      title: "提示",
-      message: "请输入自定义内容",
+      title: t('dialogTitle'),
+      message: t('msgSetCustomText'),
       icon: "edit",
       showCancel: false,
     });
@@ -277,8 +284,8 @@ function saveReminder() {
       );
     } else {
       showDialog({
-        title: '错误',
-        message: '未找到要编辑的提醒',
+        title: t('dialogTitle'),
+        message: t('msgNotFoundReminder'),
         icon: 'error',
         showCancel: false
       });
@@ -396,29 +403,8 @@ function getReminderIcon(type) {
   return icons[type] || "notifications";
 }
 
-// 获取提醒类型文本
-function getReminderTypeText(type, customText) {
-  const types = {
-    water: "喝水",
-    standup: "起身活动",
-    exercise: "运动",
-    eye: "远眺放松",
-    custom: customText || "自定义",
-  };
-  return types[type] || type;
-}
-
-// 获取重复类型文本
-function getRepeatText(repeatType) {
-  const types = {
-    once: "仅一次",
-    daily: "每天",
-    weekday: "工作日",
-    weekend: "周末",
-    interval: "间隔重复",
-  };
-  return types[repeatType] || repeatType;
-}
+// 获取提醒类型文本 - 已移至文件末尾的国际化部分
+// 获取重复类型文本 - 已移至文件末尾的国际化部分
 
 // 编辑提醒
 function editReminder(id) {
@@ -464,11 +450,11 @@ function toggleReminder(id, enabled) {
 // 删除提醒
 function deleteReminder(id) {
   showDialog({
-    title: "删除提醒",
-    message: "确定要删除这个提醒吗？",
+    title: t('dialogDelete'),
+    message: t('msgDeleteReminder'),
     icon: "delete",
-    confirmText: "删除",
-    cancelText: "取消",
+    confirmText: t('dialogDelete'),
+    cancelText: t('dialogCancel'),
     onConfirm: () => {
       reminders = reminders.filter((r) => r.id !== id);
       saveData();
@@ -515,15 +501,7 @@ function checkReminders() {
 // 触发提醒
 function triggerReminder(reminder) {
   const typeText = getReminderTypeText(reminder.type, reminder.customText);
-  const messages = {
-    water: "小猫提醒你要多喝水哦~",
-    standup: "该起来走动走动啦！",
-    exercise: "运动时间到，动起来吧！",
-    eye: "保护眼睛，向远处望一望吧~",
-    custom: reminder.note || "提醒时间到啦！",
-  };
-
-  const message = messages[reminder.type] || "提醒时间到啦！";
+  const message = getReminderMessage(reminder.type, reminder.note);
 
   // 显示系统通知
   if (settings.notificationEnabled) {
@@ -740,11 +718,11 @@ function toggleSoundSelect() {
 // 清空历史记录
 function clearHistory() {
   showDialog({
-    title: "清空历史记录",
-    message: "确定要清空所有历史记录吗？此操作不可恢复！",
+    title: t('settingClearHistory'),
+    message: t('msgClearHistory'),
     icon: "delete_sweep",
-    confirmText: "清空",
-    cancelText: "取消",
+    confirmText: t('btnClearHistory'),
+    cancelText: t('dialogCancel'),
     onConfirm: () => {
       history = [];
       saveData();
@@ -848,8 +826,8 @@ function startCountdown() {
 
   if (countdownRemaining === 0) {
     showDialog({
-      title: "提示",
-      message: "请设置倒计时时间",
+      title: t('dialogTitle'),
+      message: t('countdownSubtitle'),
       icon: "schedule",
       showCancel: false,
     });
@@ -1409,5 +1387,102 @@ function updateMotivationText(remaining, total) {
     motivationEl.textContent = '马上就要完成了！';
   } else {
     motivationEl.textContent = '最后冲刺，胜利在望！';
+  }
+}
+
+
+// ========== 国际化支持 ==========
+function updateUIText() {
+  // 更新导航
+  document.querySelector('[data-page="reminders"] p').textContent = t('navReminders');
+  document.querySelector('[data-page="focus"] p').textContent = t('navFocus');
+  document.querySelector('[data-page="countdown"] p').textContent = t('navCountdown');
+  document.querySelector('[data-page="history"] p').textContent = t('navHistory');
+  document.querySelector('[data-page="settings"] p').textContent = t('navSettings');
+  
+  // 更新标题
+  document.title = t('appTitle');
+  
+  // 提醒页面
+  document.querySelector('#remindersPage h2').textContent = t('remindersTitle');
+  document.querySelector('#remindersPage p').textContent = t('remindersSubtitle');
+  document.querySelector('#addReminderBtn').innerHTML = `<span class="material-symbols-outlined">add</span> ${t('btnNewReminder')}`;
+  
+  // 倒计时页面
+  document.querySelector('#countdownPage h2').textContent = t('countdownTitle');
+  document.querySelectorAll('#countdownPage > div > p')[0].textContent = t('countdownSubtitle');
+  document.querySelector('#countdownActiveStatus').textContent = t('countdownStatus');
+  
+  // 专注时间页面
+  document.querySelector('#focusPage h2').textContent = t('focusTitle');
+  document.querySelectorAll('#focusPage p')[0].textContent = t('focusSubtitle');
+  document.querySelector('#focusStatus').textContent = t('focusStatus');
+  document.querySelector('#focusMotivation').textContent = t('motivationStart');
+  document.querySelector('#focusActiveStatus').textContent = t('focusStatusActive');
+  
+  // 历史记录页面
+  document.querySelector('#historyPage h2').textContent = t('historyTitle');
+  document.querySelectorAll('#historyPage p')[0].textContent = t('historySubtitle');
+  
+  // 设置页面
+  document.querySelector('#settingsPage h2').textContent = t('settingsTitle');
+  document.querySelectorAll('#settingsPage > div > p')[0].textContent = t('settingsSubtitle');
+  
+  // 按钮文本
+  document.querySelector('#countdownStartBtn').innerHTML = `<span class="material-symbols-outlined">play_arrow</span> ${t('btnStart')}`;
+  document.querySelector('#focusStartBtn').innerHTML = `<span class="material-symbols-outlined">play_arrow</span> ${t('btnStartFocus')}`;
+}
+
+// 更新提醒类型文本
+function getReminderTypeText(type, customText) {
+  const types = {
+    water: t('reminderTypeWater'),
+    standup: t('reminderTypeStandup'),
+    exercise: t('reminderTypeExercise'),
+    eye: t('reminderTypeEye'),
+    custom: customText || t('reminderTypeCustom'),
+  };
+  return types[type] || type;
+}
+
+// 更新提醒消息
+function getReminderMessage(type, note) {
+  const messages = {
+    water: t('msgWater'),
+    standup: t('msgStandup'),
+    exercise: t('msgExercise'),
+    eye: t('msgEye'),
+    custom: note || t('msgCustom'),
+  };
+  return messages[type] || t('msgCustom');
+}
+
+// 更新重复类型文本
+function getRepeatText(repeatType) {
+  const types = {
+    once: t('repeatOnce'),
+    daily: t('repeatDaily'),
+    weekday: t('repeatWeekday'),
+    weekend: t('repeatWeekend'),
+    interval: t('repeatInterval'),
+  };
+  return types[repeatType] || repeatType;
+}
+
+// 更新激励文字
+function updateMotivationText(remaining, total) {
+  const progress = (total - remaining) / total;
+  const motivationEl = document.getElementById('focusMotivation');
+  
+  if (progress < 0.25) {
+    motivationEl.textContent = t('motivationStart');
+  } else if (progress < 0.5) {
+    motivationEl.textContent = t('motivationQuarter');
+  } else if (progress < 0.75) {
+    motivationEl.textContent = t('motivationHalf');
+  } else if (progress < 0.9) {
+    motivationEl.textContent = t('motivationThreeQuarter');
+  } else {
+    motivationEl.textContent = t('motivationAlmost');
   }
 }

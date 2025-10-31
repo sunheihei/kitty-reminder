@@ -35,7 +35,20 @@ npm start
 # Build
 npm run package:win   # Windows
 npm run package:mac   # macOS
-npm run package:linux # Linux
+```
+
+## 🚀 Release New Version
+
+See [RELEASE_COMMANDS.md](RELEASE_COMMANDS.md) for quick reference.
+
+```bash
+# 1. Update version in package.json
+# 2. Run these commands:
+git add .
+git commit -m "chore: release v1.0.1"
+git push
+git tag v1.0.1
+git push origin v1.0.1
 ```
 
 ## 🤝 Contributing
