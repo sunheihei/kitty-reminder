@@ -15,7 +15,10 @@
     "electron",
     "productivity"
   ],
-  "author": "",
+  "author": {
+    "name": "Kitty Reminder",
+    "email": "kitty@reminder.app"
+  },
   "license": "ISC",
   "description": "Cute kitty reminder app - Timely reminders for water and breaks",
   "build": {
