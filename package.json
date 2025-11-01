@@ -21,6 +21,7 @@
   "build": {
     "appId": "com.kitty.reminder",
     "productName": "Kitty Reminder",
+    "publish": null,
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "assets/cat.icns",
