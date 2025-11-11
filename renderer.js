@@ -424,6 +424,8 @@ function getReminderIcon(type) {
     standup: "directions_walk",
     exercise: "directions_run",
     eye: "visibility",
+    focus: "psychology",
+    countdown: "timer",
     custom: "edit_note",
   };
   return icons[type] || "notifications";
@@ -690,7 +692,20 @@ function renderHistory() {
       const timeStr = `${String(date.getHours()).padStart(2, "0")}:${String(
         date.getMinutes()
       ).padStart(2, "0")}`;
-      const typeText = getReminderTypeText(h.type, h.customText);
+      
+      // 根据类型显示不同的文本
+      let typeText = '';
+      let durationText = '';
+      
+      if (h.type === 'focus' || h.type === 'countdown') {
+        // 专注时间和倒计时显示类型名称
+        typeText = getReminderTypeText(h.type);
+        // 显示时长信息
+        durationText = h.customText || '';
+      } else {
+        // 其他类型显示原有逻辑
+        typeText = getReminderTypeText(h.type, h.customText);
+      }
 
       return `
       <div class="bg-white dark:bg-white/5 rounded-xl border border-[#f4ede7] dark:border-white/10 p-4 flex items-center justify-between">
@@ -701,7 +716,7 @@ function renderHistory() {
             )}</span>
           </div>
           <div>
-            <p class="text-[#1c140d] dark:text-white text-base font-medium">${typeText}</p>
+            <p class="text-[#1c140d] dark:text-white text-base font-medium">${typeText}${durationText ? ` · ${durationText}` : ''}</p>
             <p class="text-[#9c7049] dark:text-gray-400 text-sm">${timeStr}</p>
           </div>
         </div>
@@ -900,6 +915,18 @@ function startCountdown() {
         }
       }
       
+      // 添加到历史记录
+      const countdownDuration = Math.floor(countdownTotalTime / 60);
+      history.push({
+        id: Date.now(),
+        type: 'countdown',
+        customText: `${countdownDuration}${t('unitMinutes')}`,
+        completedAt: new Date().toISOString(),
+        status: 'completed',
+      });
+      saveData();
+      updateStats();
+      
       // 显示对话框
       showDialog({
         title: "倒计时结束",
@@ -954,6 +981,18 @@ function resumeCountdown() {
           });
         }
       }
+      
+      // 添加到历史记录
+      const countdownDuration = Math.floor(countdownTotalTime / 60);
+      history.push({
+        id: Date.now(),
+        type: 'countdown',
+        customText: `${countdownDuration}${t('unitMinutes')}`,
+        completedAt: new Date().toISOString(),
+        status: 'completed',
+      });
+      saveData();
+      updateStats();
       
       // 显示对话框
       showDialog({
@@ -1624,6 +1663,8 @@ function updateUIText() {
     const filterStandup = document.getElementById('filterStandup');
     const filterExercise = document.getElementById('filterExercise');
     const filterEye = document.getElementById('filterEye');
+    const filterFocus = document.getElementById('filterFocus');
+    const filterCountdown = document.getElementById('filterCountdown');
     const filterCustom = document.getElementById('filterCustom');
     
     if (filterAll) filterAll.textContent = t('filterAll');
@@ -1631,6 +1672,8 @@ function updateUIText() {
     if (filterStandup) filterStandup.textContent = t('reminderTypeStandup');
     if (filterExercise) filterExercise.textContent = t('reminderTypeExercise');
     if (filterEye) filterEye.textContent = t('reminderTypeEye');
+    if (filterFocus) filterFocus.textContent = t('reminderTypeFocus');
+    if (filterCountdown) filterCountdown.textContent = t('reminderTypeCountdown');
     if (filterCustom) filterCustom.textContent = t('reminderTypeCustom');
     
     console.log('UI text updated to:', getCurrentLanguage());
@@ -1646,6 +1689,8 @@ function getReminderTypeText(type, customText) {
     standup: t('reminderTypeStandup'),
     exercise: t('reminderTypeExercise'),
     eye: t('reminderTypeEye'),
+    focus: t('reminderTypeFocus'),
+    countdown: t('reminderTypeCountdown'),
     custom: customText || t('reminderTypeCustom'),
   };
   return types[type] || type;

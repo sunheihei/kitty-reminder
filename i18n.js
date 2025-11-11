@@ -178,6 +178,10 @@ const translations = {
     // 历史筛选
     filterAll: '全部类型',
     
+    // 提醒类型 - 专注和倒计时
+    reminderTypeFocus: '专注时间',
+    reminderTypeCountdown: '倒计时',
+    
     // 设置项
     settingAutoStart: '开机自启动',
     settingAutoStartDesc: '系统启动时自动运行',
@@ -373,6 +377,10 @@ const translations = {
     // History filter
     filterAll: 'All Types',
     
+    // Reminder types - Focus and Countdown
+    reminderTypeFocus: 'Focus Time',
+    reminderTypeCountdown: 'Countdown',
+    
     // Settings
     settingAutoStart: 'Auto Start',
     settingAutoStartDesc: 'Start automatically on system boot',
@@ -433,7 +441,7 @@ function initLanguage() {
 }
 
 // 更新 UI 文本
-function updateUI() {
+function updateUIText() {
   // 更新所有带 data-i18n 属性的元素
   document.querySelectorAll('[data-i18n]').forEach(element => {
     const key = element.getAttribute('data-i18n');
@@ -452,5 +460,5 @@ function updateUI() {
 
 // 导出函数
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { t, setLanguage, getCurrentLanguage, initLanguage, updateUI };
+  module.exports = { t, setLanguage, getCurrentLanguage, initLanguage, updateUIText };
 }
