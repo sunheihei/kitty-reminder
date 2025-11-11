@@ -154,6 +154,10 @@ const translations = {
     // 单位
     unitMinutes: '分钟',
     unitEvery: '每',
+    
+    // 自定义专注时间对话框
+    customFocusTime: '自定义专注时间',
+    customFocusPrompt: '请输入专注时间（1-180分钟）',
   },
   
   'en-US': {
@@ -437,12 +441,20 @@ const translations = {
     settingClearHistory: '清空历史记录',
     settingClearHistoryDesc: '永久删除所有提醒历史',
     btnClearHistory: '清空历史',
+    settingShowWindow: '点击通知时显示窗口',
+    settingShowWindowDesc: '点击通知后自动打开主窗口',
     
     // 关于页面
     aboutTitle: '关于 Kitty Reminder',
     aboutVersion: '版本',
     aboutDescription: '健康生活助手 · 专注时间管理',
     aboutSubDescription: '让每一刻都充满价值',
+    aboutFeaturesTitle: '功能特性',
+    aboutFeature1: '智能提醒 - 定时提醒喝水、起身、运动',
+    aboutFeature2: '专注时间 - 番茄工作法，保持高效专注',
+    aboutFeature3: '倒计时 - 灵活的时间管理工具',
+    aboutFeature4: '历史记录 - 追踪你的健康习惯',
+    aboutFeature5: '系统托盘 - 后台运行不打扰',
     
     // 提醒类型
     reminderTypeWater: '喝水',
@@ -465,6 +477,24 @@ const translations = {
     repeatWeekend: '周末',
     repeatInterval: '间隔重复',
     
+        // History filter
+    filterAll: '全部类型',
+    
+    settingShowWindow: '点击通知时显示窗口',
+    settingShowWindowDesc: '点击通知后自动打开主窗口',
+    settingAutoStart: '开机自启动',
+    settingAutoStartDesc: '系统启动时自动运行',
+    
+    // 音效选项
+    sound1: '音效 1',
+    sound2: '音效 2',
+    sound3: '音效 3',
+    sound4: '音效 4',
+    sound5: '音效 5',
+    sound6: '音效 6',
+    sound7: '音效 7',
+    sound8: '音效 8',
+
     // 对话框
     dialogTitle: '提示',
     dialogConfirm: '确定',
@@ -507,6 +537,10 @@ const translations = {
     labelMinute: '分钟',
     labelSecond: '秒',
     customTime: '自定义',
+    
+    // 自定义专注时间对话框
+    customFocusTime: '自定义专注时间',
+    customFocusPrompt: '请输入专注时间（1-180分钟）',
   }
 };
 
@@ -574,34 +608,4 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = { t, setLanguage, getCurrentLanguage, initLanguage, updateUI };
 }
 
-
-// ========== 临时翻译补充（需要手动合并到上面的对应位置） ==========
-/*
-需要在第一个 'en-US' 和 'zh-CN' 部分的 btnClearHistory 后添加：
-
-    settingShowWindow: '点击通知时显示窗口',
-    settingShowWindowDesc: '点击通知后自动打开主窗口',
-    
-    // 音效选项
-    sound1: '音效 1',
-    sound2: '音效 2',
-    sound3: '音效 3',
-    sound4: '音效 4',
-    sound5: '音效 5',
-    sound6: '音效 6',
-    sound7: '音效 7',
-    sound8: '音效 8',
-
-需要在 aboutSubDescription 后添加：
-
-    aboutFeaturesTitle: '功能特性',
-    aboutFeature1: '智能提醒 - 定时提醒喝水、起身、运动',
-    aboutFeature2: '专注时间 - 番茄工作法，保持高效专注',
-    aboutFeature3: '倒计时 - 灵活的时间管理工具',
-    aboutFeature4: '历史记录 - 追踪你的健康习惯',
-
-需要在 settingDefaultIntervalDesc 后添加：
-
-    settingAutoStart: '开机自启动',
-    settingAutoStartDesc: '系统启动时自动运行',
-*/
+ 
