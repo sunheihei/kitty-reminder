@@ -1012,10 +1012,6 @@ function updateCountdownActiveDisplay() {
   ).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
     seconds
   ).padStart(2, "0")}`;
-  
-  // 更新进度百分比
-  const progressPercent = Math.round(((countdownTotalTime - countdownRemaining) / countdownTotalTime) * 100);
-  document.getElementById('countdownProgress').textContent = `${progressPercent}%`;
 }
 
 function updateCountdownProgress() {
@@ -1028,112 +1024,6 @@ function updateCountdownProgress() {
 
 // ========== 专注时间功能（重写） ==========
 let focusTotalTime = 25 * 60;
-
-// 删除旧的专注时间代码，使用新版本
-/*
-function initFocus() {
-  document
-    .getElementById("focusStartBtn")
-    .addEventListener("click", startFocus);
-  document
-    .getElementById("focusPauseBtn")
-    .addEventListener("click", pauseFocus);
-  document
-    .getElementById("focusResetBtn")
-    .addEventListener("click", resetFocus);
-
-  document.querySelectorAll(".focus-preset").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      const minutes = parseInt(e.currentTarget.dataset.minutes);
-      focusRemaining = minutes * 60;
-      updateFocusDisplay();
-    });
-  });
-
-  updateFocusDisplay();
-}
-
-function startFocus() {
-  if (focusTimer) return;
-
-  document.getElementById("focusStartBtn").classList.add("hidden");
-  document.getElementById("focusPauseBtn").classList.remove("hidden");
-  document.getElementById("focusStatus").textContent =
-    focusMode === "work" ? "专注中..." : "休息中...";
-
-  focusTimer = setInterval(() => {
-    focusRemaining--;
-    updateFocusDisplay();
-
-    if (focusRemaining <= 0) {
-      clearInterval(focusTimer);
-      focusTimer = null;
-      playNotificationSound();
-
-      if (focusMode === "work") {
-        showDialog({
-          title: "专注时间结束",
-          message: "做得好！该休息一下了",
-          icon: "celebration",
-          showCancel: false,
-          onConfirm: () => {
-            focusMode = "break";
-            focusRemaining = 5 * 60;
-            updateFocusDisplay();
-          },
-        });
-      } else {
-        showDialog({
-          title: "休息时间结束",
-          message: "准备好开始下一轮专注了吗？",
-          icon: "psychology",
-          showCancel: false,
-          onConfirm: () => {
-            focusMode = "work";
-            focusRemaining = 25 * 60;
-            updateFocusDisplay();
-          },
-        });
-      }
-
-      resetFocus();
-    }
-  }, 1000);
-}
-
-function pauseFocus() {
-  if (focusTimer) {
-    clearInterval(focusTimer);
-    focusTimer = null;
-    document.getElementById("focusStartBtn").classList.remove("hidden");
-    document.getElementById("focusPauseBtn").classList.add("hidden");
-    document.getElementById("focusStatus").textContent = "已暂停";
-  }
-}
-
-function resetFocus() {
-  if (focusTimer) {
-    clearInterval(focusTimer);
-    focusTimer = null;
-  }
-  focusMode = "work";
-  focusRemaining = 25 * 60;
-  updateFocusDisplay();
-  document.getElementById("focusStartBtn").classList.remove("hidden");
-  document.getElementById("focusPauseBtn").classList.add("hidden");
-  document.getElementById("focusStatus").textContent = "准备开始专注";
-}
-
-function updateFocusDisplay() {
-  const minutes = Math.floor(focusRemaining / 60);
-  const seconds = focusRemaining % 60;
-
-  document.getElementById("focusDisplay").textContent = `${String(
-    minutes
-  ).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
-
-*/
 
 // 新的专注时间功能
 let focusIsPaused = false;
@@ -1281,6 +1171,18 @@ function startFocus() {
         }
       }
       
+      // 添加到历史记录
+      const focusDuration = Math.floor(focusTotalTime / 60);
+      history.push({
+        id: Date.now(),
+        type: 'focus',
+        customText: `${focusDuration}${t('unitMinutes')}`,
+        completedAt: new Date().toISOString(),
+        status: 'completed',
+      });
+      saveData();
+      updateStats();
+      
       // 显示对话框
       showDialog({
         title: '专注时间结束',
@@ -1336,6 +1238,18 @@ function resumeFocus() {
         }
       }
       
+      // 添加到历史记录
+      const focusDuration = Math.floor(focusTotalTime / 60);
+      history.push({
+        id: Date.now(),
+        type: 'focus',
+        customText: `${focusDuration}${t('unitMinutes')}`,
+        completedAt: new Date().toISOString(),
+        status: 'completed',
+      });
+      saveData();
+      updateStats();
+      
       // 显示对话框
       showDialog({
         title: '专注时间结束',
@@ -1382,10 +1296,6 @@ function updateFocusActiveDisplay() {
   const minutes = Math.floor(focusRemaining / 60);
   const seconds = focusRemaining % 60;
   document.getElementById('focusActiveDisplay').textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  
-  // 更新进度百分比
-  const progressPercent = Math.round(((focusTotalTime - focusRemaining) / focusTotalTime) * 100);
-  document.getElementById('focusProgress').textContent = `${progressPercent}%`;
   
   // 更新激励文字
   updateMotivationText(focusRemaining, focusTotalTime);
