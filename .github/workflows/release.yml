@@ -3,84 +3,104 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*'  # 当推送 v 开头的标签时触发，如 v1.0.0
+      - "v*"
 
 permissions:
   contents: write
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest]
-    
+  build-macos:
+    runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      
+          node-version: "20"
+
       - name: Install dependencies
         run: npm install
-      
-      - name: Build Windows
-        if: matrix.os == 'windows-latest'
-        run: npm run package:win
-      
-      - name: Build macOS
-        if: matrix.os == 'macos-latest'
-        run: npm run package:mac
-      
-      - name: Compress Windows build
-        if: matrix.os == 'windows-latest'
-        run: |
-          Compress-Archive -Path "release/Kitty Reminder-win32-x64" -DestinationPath "Kitty-Reminder-Windows-x64.zip"
-        shell: pwsh
-      
-      - name: Compress macOS build
-        if: matrix.os == 'macos-latest'
-        run: |
-          cd release
-          zip -r ../Kitty-Reminder-macOS-x64.zip "Kitty Reminder-darwin-x64"
-          zip -r ../Kitty-Reminder-macOS-arm64.zip "Kitty Reminder-darwin-arm64"
-      
-      - name: Upload Windows artifact
-        if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-build
-          path: Kitty-Reminder-Windows-x64.zip
-      
-      - name: Upload macOS artifacts
-        if: matrix.os == 'macos-latest'
+
+      - name: Build macOS app
+        run: npm run build:dmg
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: macos-build
+          path: dist/*.dmg
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Windows app
+        run: npx electron-builder --win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: dist/*.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Linux app
+        run: npx electron-builder --linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
           path: |
-            Kitty-Reminder-macOS-x64.zip
-            Kitty-Reminder-macOS-arm64.zip
+            dist/*.AppImage
+            dist/*.deb
 
   release:
-    needs: build
+    needs: [build-macos, build-windows, build-linux]
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
-      
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            windows-build/Kitty-Reminder-Windows-x64.zip
-            macos-build/Kitty-Reminder-macOS-x64.zip
-            macos-build/Kitty-Reminder-macOS-arm64.zip
+            macos-build/*
+            windows-build/*
+            linux-build/*
           draft: false
           prerelease: false

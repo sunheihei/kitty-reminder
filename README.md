@@ -15,11 +15,22 @@ A cute desktop reminder app to help you stay healthy and productive! Get gentle 
 
 ## 📥 Download
 
-Download the latest version for your platform from the [Releases page](https://github.com/yourusername/kitty-reminder/releases).
+Download the latest version for your platform from the [Releases page](https://github.com/sunheihei/kitty-reminder/releases).
 
-**Windows:** Extract ZIP and run `Kitty Reminder.exe`  
-**macOS:** Extract ZIP and drag to Applications folder  
-**Linux:** Extract tar.gz and run the executable
+### Windows
+Download the `.exe` installer and run it.
+
+### macOS
+1. Download the `.dmg` file (choose `arm64` for Apple Silicon or `x64` for Intel)
+2. Open the DMG and drag the app to Applications folder
+3. **Important:** If you see "App is damaged" error, run this command in Terminal:
+   ```bash
+   sudo xattr -cr /Applications/Kitty\ Reminder.app
+   ```
+   Then try opening the app again.
+
+### Linux
+Download the `.AppImage` or `.deb` file and install it.
 
 ## 🛠️ Development
 
@@ -33,8 +44,8 @@ npm install
 npm start
 
 # Build
-npm run package:win   # Windows
-npm run package:mac   # macOS
+npm run build:dmg     # macOS DMG
+npm run build:all     # All platforms
 ```
 
 ## 🚀 Release New Version
