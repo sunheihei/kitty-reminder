@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateStats();
   renderReminders();
   checkReminders();
-  setInterval(checkReminders, 30000);
+  setInterval(checkReminders, 10000); // 每10秒检查一次，提高精确度
 
   // 初始化倒计时和专注时间
   initCountdown();
@@ -355,6 +355,19 @@ function calculateNextTrigger(time, repeatType, intervalMinutes) {
     next.setDate(next.getDate() + 1);
   }
 
+  // 处理工作日和周末
+  if (repeatType === "weekday") {
+    // 如果是周末，跳到下周一
+    while (next.getDay() === 0 || next.getDay() === 6) {
+      next.setDate(next.getDate() + 1);
+    }
+  } else if (repeatType === "weekend") {
+    // 如果是工作日，跳到周末
+    while (next.getDay() !== 0 && next.getDay() !== 6) {
+      next.setDate(next.getDate() + 1);
+    }
+  }
+
   return next.toISOString();
 }
 
@@ -507,13 +520,33 @@ function checkReminders() {
         reminder.nextTrigger = new Date(
           nextTrigger.getTime() + reminder.intervalMinutes * 60000
         ).toISOString();
-      } else if (reminder.repeatType !== "once") {
+      } else if (reminder.repeatType === "weekday") {
+        // 工作日：周一到周五
+        const [hours, minutes] = reminder.time.split(":").map(Number);
+        const next = new Date(nextTrigger);
+        do {
+          next.setDate(next.getDate() + 1);
+        } while (next.getDay() === 0 || next.getDay() === 6); // 跳过周末
+        next.setHours(hours, minutes, 0, 0);
+        reminder.nextTrigger = next.toISOString();
+      } else if (reminder.repeatType === "weekend") {
+        // 周末：周六和周日
+        const [hours, minutes] = reminder.time.split(":").map(Number);
+        const next = new Date(nextTrigger);
+        do {
+          next.setDate(next.getDate() + 1);
+        } while (next.getDay() !== 0 && next.getDay() !== 6); // 只在周末
+        next.setHours(hours, minutes, 0, 0);
+        reminder.nextTrigger = next.toISOString();
+      } else if (reminder.repeatType === "daily") {
+        // 每天
         const [hours, minutes] = reminder.time.split(":").map(Number);
         const next = new Date(nextTrigger);
         next.setDate(next.getDate() + 1);
         next.setHours(hours, minutes, 0, 0);
         reminder.nextTrigger = next.toISOString();
-      } else {
+      } else if (reminder.repeatType === "once") {
+        // 仅一次，禁用提醒
         reminder.enabled = false;
       }
 
@@ -562,16 +595,8 @@ function triggerReminder(reminder) {
   }
 }
 
-// 显示提醒弹窗
+// 当前提醒ID（用于通知点击事件）
 let currentReminderId = null;
-
-function showReminderPopup(title, message, reminderId) {
-  currentReminderId = reminderId;
-  document.getElementById("popupTitle").textContent = title;
-  document.getElementById("popupMessage").textContent = message;
-  document.getElementById("reminderPopup").classList.remove("hidden");
-  document.getElementById("snoozeOptions").classList.add("hidden");
-}
 
 // 完成提醒
 function completeReminder() {
